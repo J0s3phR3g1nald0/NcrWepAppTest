@@ -1,0 +1,12 @@
+[workspace]
+restore_data_on_startup = True
+save_data_on_exit = True
+save_history = True
+save_non_project_files = False
+project_type = 'empty-project-type'
+recent_files = ['NCRMgmntSystem\\views.py', 'template\\NCRMgmntSystem\\ncr_search.html', 'template\\NCRMgmntSystem\\project_list_show.html', 'template\\NCRMgmntSystem\\ncr_create.html', 'template\\NCRMgmntSystem\\ncr_create_history.html', '2daysReminder\\reminder.bat', '2daysReminder\\reminder.py']
+
+[main]
+version = 0.2.0
+recent_files = []
+
