@@ -2755,6 +2755,7 @@ def ncr_verify_accept(request):
             
             
             if success_message not in (''):
+                print('>>>>>>>>>>>'+str(n))
                 sendmail_NCR_cancel_request('0', n)
                 #sendmail_NCR_cancel_request('0',n)
                 n.status = '4'
@@ -3587,73 +3588,74 @@ def create_deny_reason(ncr_no, rev_no, step, reason, deny_by, deny_date):
     return error_message
 
 
-def sendmail_create(mailType, n, userId):
+def sendmail_create(mailType, n):
     subject = 'NCR Create Status Notification: ' + str(n.ncr_no)       
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     send_to = ''  
     content = ''
-
-    e1 =  Employee.objects.get(chapano=userId)
     
     if mailType == 'A':
         e =  Employee.objects.get(chapano=n.nc_conformed_by)
         send_to = e.email
-        #user_id = e.chapano
-        #content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section. Kindly confirm by clicking\non the link below to proceed with NCR process.\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks\nfor Minor NC or 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
-        content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly click\non the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    NCR must be closed within 2 weeks for Minor NC and 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
-
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section. Kindly confirm by clicking\non the link below to proceed with NCR process.\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks\nfor Minor NC or 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+        
     elif mailType == 'B':
         e =  Employee.objects.get(chapano=n.ic_approve_by)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Immediate correction was performed by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly confirm\n the content for your approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Immediate correction was performed. Kindly confirm\ncontent for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
     
     elif mailType == 'C-Yes':
         e =  Employee.objects.get(chapano=n.rca_approve_by)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Root cause for this NCR has been analyzed by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly confirm\ncontent for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    A Nonconformance has been analyzed. Kindly confirm\ncontent for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
 
     elif mailType == 'C-No':
         e =  Employee.objects.get(chapano=n.rca_approve_by)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Root cause for this NCR has been analyzed. It was found that corrective action was not necessary\n and is requesting for NCR closing. Kindly confirm the effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    A Nonconformance has been analyzed and found that corrective action was not necessary\n and is requesting for NCR closing. Kindly confirm the effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
 
     elif mailType == 'D':
         #modified by ROS 2022/06/08
         #e =  Employee.objects.get(chapano=n.ic_approve_by)
         e =  Employee.objects.get(chapano=n.ca_checked_by_sh)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Corrective action for this NCR was set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly confirm\n content for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    A Nonconformance corrective action was set. Kindly confirm\n content for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
 
     elif mailType == 'C&D':
         #modified by ROS 2022/06/08
         #e =  Employee.objects.get(chapano=n.ic_approve_by)
         e =  Employee.objects.get(chapano=n.rca_approve_by) 
-        #user_id = e.chapano
+
+        user_id = e.chapano
+    
+    
         send_to = e.email
-        #content = "Sir/Madam,\n\n    A Nonconformance has been analyzed and corrective action was set. Kindly confirm\ncontent for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
-        content = "Sir/Madam,\n\n    Root cause analyzation and Corrective action for this NCR was set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ".\n Kindly confirm content for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        content = "Sir/Madam,\n\n    A Nonconformance has been analyzed and corrective action was set. Kindly confirm\ncontent for approval by clicking on the link below to proceed to next step.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+
+
         
     elif mailType == 'E-returnToC':
         e =  Employee.objects.get(chapano=n.rca_approve_by)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Previous corrective action was not effective. New analysis and corrective action was set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ".\n Kindly confirm\ncontent for approval by clicking below button.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Previous corrective action was not effective. New analysis and corrective action was set. Kindly confirm\ncontent for approval by clicking below button.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
 
     elif mailType == 'E-proceedToF':
         e =  Employee.objects.get(chapano=n.ra_check_by_sh)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Result Of Action and its Effectiveness has been set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ".\n Kindly confirm its result and effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Result Of Action and its Effectiveness has been accomplished. Kindly confirm its result and effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
         
     elif mailType == 'E':
         e =  Employee.objects.get(chapano=n.ra_check_by_sh)
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Result Of Action has been set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ".\n Kindly confirm its result by clicking on the \nlink below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Result Of Action has been accomplished. Kindly confirm its result by clicking on the \nlink below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
 
     elif mailType == 'F':
         if (n.se_check_by_mgr_status == '1'): 
@@ -3662,8 +3664,10 @@ def sendmail_create(mailType, n, userId):
             e =  Employee.objects.get(chapano=n.ra_check_by_sh)
         
         send_to = e.email
-        #user_id = e.chapano
-        content = "Sir/Madam,\n\n    Effectiveness of action has been set by Mr./Ms. " + e1.firstname + " " + e1.lastname + ".\n Kindly confirm the effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Effectiveness of action has been accomplished. Kindly confirm the effectiveness\nby clicking on the link below to close this NCR.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+    
+    
 
     elif mailType == 'C_approved-y/n':
         #e =  Employee.objects.get(chapano=n.rca_approve_by) 
@@ -3698,6 +3702,8 @@ def sendmail_verify_accept(mailType, n):
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     e1 =  Employee.objects.get(chapano=n.nc_conformed_by)
 
+    
+    
     #Start modify for additional request Edric Charles C. Marinas 2024/03/04
      
     '''if mailType == '1':
@@ -3712,50 +3718,61 @@ def sendmail_verify_accept(mailType, n):
         nc_discovered_by_email = ''
         send_to = ''
         dept = n.dept
+        print(dept)
         
-        #try:
-        #    #e =  Employee.objects.get(chapano=n.nc_conformed_by)
-        #    send_to = e1.email
-        #    user_id = e1.chapano
-        #    content = "Sir/Madam,\n\n    You had succesfully accepted the NCR. Kindly click\non the link below if you want to see the details.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
-        #    send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-        #
-        #except:
-        #    print("ERROR 1")
-        #
-        ##Added Edric Marinas 2024/05/08
+        try:
+            e =  Employee.objects.get(chapano=n.nc_conformed_by)
+            #send_to = e.email
+            #user_id = e.chapano
+            #content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section. Kindly confirm by clicking\non the link below to proceed with NCR process.\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks\nfor Minor NC or 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+            #send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        
 
+        except:
+            print("ERROR 1")
+        
+        #Added Edric Marinas 2024/05/08 
+        
+        
+        #Discovered By 2024/05/08
+        try:
+
+            nc_discovered_by_email = n.nc_discovered_by_email
+            rev = str(n.rev_no)
+            content = "Sir/Madam,\n\n    A Nonconformance for "+ str(dept)+" section had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n  You can see the details by clicking the link below.\n\n   " + PROJ_URL + "ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+            send_mail(subject, content, from_email, [nc_discovered_by_email], fail_silently=False,)
+            print("(Discovered By) Email sent to  Email: "+  nc_discovered_by_email)
+            print( "URL: "+ PROJ_URL + " ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view")
+
+        except:
+            print("ERROR DISCOVERER")
+            
+        
+        #End
+            
         try:
             e = Employee.objects.get(chapano=n.ic_incharge)
             send_to = e.email
             user_id = e.chapano
             
             if n.classification == "1":
-                #content = "Sir/Madam,\n\n    Issued NCR registered " + n.ncr_no + " had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks for Minor NC.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
-                content = "Sir/Madam,\n\n    Issued NCR had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + " and was assigned to you.\n\n    Click on the link below and fill-in your corrective action for this NCR.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks for Minor NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+                content = "Sir/Madam,\n\n    Issued NCR registered " + n.ncr_no + " had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks for Minor NC.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
             else:
-                #content = "Sir/Madam,\n\n    Issued NCR registered " + n.ncr_no + " had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Please accomplish necessary action and verify effectiveness within 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
-                content = "Sir/Madam,\n\n    Issued NCR had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + " and was assigned to you.\n\n    Click on the link below and fill-in your corrective action for this NCR.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Please accomplish necessary action and verify effectiveness within 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply." 
+                content = "Sir/Madam,\n\n    Issued NCR registered " + n.ncr_no + " had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Please accomplish necessary action and verify effectiveness within 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
             if nc_discovered_by_email != send_to:
                 send_mail(subject, content, from_email, [send_to], fail_silently=False,)
                 print("(in charge) Email sent to ChapaNo: " + e.chapano +" Email: "+  send_to)
         except:
-            print("ERROR 2") 
- 
-        
-        #Discovered By 2024/05/08
-        try:
-            nc_discovered_by_email = n.nc_discovered_by_email
-            rev = str(n.rev_no)
-            content = "Sir/Madam,\n\n    A Nonconformance for " + str(dept) + " section had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n  You can see the details by clicking the link below.\n\n   " + PROJ_URL + "ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
-            send_mail(subject, content, from_email, [nc_discovered_by_email], fail_silently=False,)
-            #print("(Discovered By) Email sent to  Email: "+  nc_discovered_by_email)
-            #print( "URL: "+ PROJ_URL + " ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view")
+            print("ERROR 2")
+       
+        """try :
+            send_to.append(discoverer_email)
+
         except:
-            print("ERROR DISCOVERER")        
-        #End
+            print("error")"""
             
         try:    
+
             #GRP MANAGER            
             sqlStmt = """
                       SELECT e.chapaNo as chapano, concat(e.lastName, ', ' ,  e.firstName, ' ' ,  e.middleName) as name, e.email as email
@@ -3770,27 +3787,33 @@ def sendmail_verify_accept(mailType, n):
             for x in members:
                 send_to = x.email
                 user_id = x.chapano
-                content = "Sir/Madam,\n\n    A Nonconformance for " + str(dept)+ " section had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+                
+
+
+                content = "Sir/Madam,\n\n    A Nonconformance for "+ str(dept)+" section had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
                 if nc_discovered_by_email != send_to:
                     send_mail(subject, content, from_email, [send_to], fail_silently=False,)
                     print("(Grp manager) Email sent to ChapaNo: " + x.chapano +" Email: "+ send_to)
         except:
             print("ERROR 3")
 
+
+
         try: 
         #QA MEMBERS
             sql = """SELECT n.chapano AS chapano, e.email AS email, e.firstname AS firstname FROM ncr_adv_user_tbl n, employee e 
                   WHERE e.chapano = n.chapano AND n.user_type = '4'"""
             
+            
             with connection.cursor() as c:
                 c.execute(sql)
+                
                 qa_mgrs = namedtuplefetchall(c)                     
     
             for qa_mgr in qa_mgrs:
                 send_to = qa_mgr.email
                 user_id = qa_mgr.chapano
-                #content = "Sir/Madam,\n\n    A Nonconformance has been issued in " + str(dept) + " section.\n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
-                content = "Sir/Madam,\n\n    A Nonconformance for " + str(dept) + " section had been accepted by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+                content = "Sir/Madam,\n\n    A Nonconformance has been issued in "+ str(dept) +" section.\n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
                 if nc_discovered_by_email != send_to:
                     send_mail(subject, content, from_email, [send_to], fail_silently=False,)
                     print("(QA members) First Name"+qa_mgr.firstname +" Email sent to ChapaNo: " +qa_mgr.chapano +" Email: "+qa_mgr.email)
@@ -3801,7 +3824,11 @@ def sendmail_verify_accept(mailType, n):
                 
         #End modify for additional request Edric Charles C. Marinas 2024/03/04
         
+        
+        
+        
     elif mailType == '2':
+        
         
         
         e1 =  Employee.objects.get(chapano=n.ca_checked_by_sh)
@@ -3809,6 +3836,7 @@ def sendmail_verify_accept(mailType, n):
         
         send_to = e2.email
         user_id = e2.chapano
+        
         
         if n.ca_checked_by_sh != n.rca_approve_by:
             e3 =  Employee.objects.get(chapano=n.rca_approve_by)
@@ -3971,15 +3999,6 @@ def sendmail_verify_accept(mailType, n):
         
         send_mail(subject, content, from_email, [send_to], fail_silently=False,)
         
-
-
-
-
-
-
-
-
-
     elif mailType == 'C-Yes':
         
         e1 =  Employee.objects.get(chapano=n.rca_approve_by)
@@ -4177,6 +4196,7 @@ def load_checkers(request):
 def ncr_create(request):
     print('START : ncr_create')
     
+
     deny_reasonA = request.POST.get('deny_reasonA', '')
     deny_reasonB = request.POST.get('deny_reasonB', '')
     deny_reasonC = request.POST.get('deny_reasonC', '')
@@ -4241,6 +4261,11 @@ def ncr_create(request):
     
     ncr_no = form.data.get('ncr_no') 
     reason_action_not_effective = form.data.get('reason_action_not_effective') 
+    
+    
+    
+    
+    
     
     if is_error_on_required(request, form):    
         error_message = 'Highlighted fields are required.'
@@ -4362,8 +4387,7 @@ def ncr_create(request):
                     
                     if S_or_SN == 'SN':
                             print(S_or_SN)
-                            ##sendmail_create('A', n)
-                            sendmail_create('A', n, logged_user_chapa_no)
+                            sendmail_create('A', n)
                             message = request.session["Message"] = "NCR data was succesfully inserted in database and email notification was sent."
                             error_message = ""
                             
@@ -4391,10 +4415,13 @@ def ncr_create(request):
                 error_message = "Record with NCR#" + ncr_no + "does not exist in NCR_DETAIL_MSTR!"                   
         else:
             hidden_dept_id = form.data.get('dept') 
+                
+
         
         set_dropdowns(form, hidden_dept_id)
          
         context = {
+            
                    'nc_discovered_by_email':n.nc_discovered_by_email,
                    'form': form, 
                    'ncr_no': ncr_no, 
@@ -4425,6 +4452,8 @@ def ncr_create(request):
         # display error on screen
         return render(request, 'NCRMgmntSystem/ncr_create.html', context)      
     
+    
+    
     else:
 
         if send_email_success:
@@ -4441,6 +4470,9 @@ def ncr_create_insert(request, form, login_user_chapa_no):
     current_datetime = datetime.datetime.now()
     serial_no = '0000'
     deadline = ''
+
+
+
 
     #get input values from screen
     ncr_no = form.cleaned_data['ncr_no']        
@@ -4460,6 +4492,11 @@ def ncr_create_insert(request, form, login_user_chapa_no):
 
     #2024/05/08
     nc_discovered_by_email = form.cleaned_data['nc_discovered_by_email']
+    
+    
+
+    
+
     
     #set serial_no
     sqlStmt = "SELECT count(*) FROM seq_table WHERE name = '" + str(dept.id) + "-" + str(project.id) + "'"       
@@ -4572,6 +4609,9 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     
     current_datetime = datetime.datetime.now()
 
+
+
+
     source = form.cleaned_data['source']
     other_source = form.cleaned_data['other_source']
     classification = form.cleaned_data['classification']
@@ -4598,8 +4638,15 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     se_check_by_mgr = form.cleaned_data['se_check_by_mgr']
     ic_incharge = form.cleaned_data['ic_incharge']
 
+    
+    
     #2024/05/08
     nc_discovered_by_email = form.cleaned_data['nc_discovered_by_email']
+    
+    
+
+
+
     
    #Start adding for additional request Edric 2024/03/06
     has_desc_F = False
@@ -4608,6 +4655,10 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     has_desc_C = False
     has_desc_B = False
     has_desc_A = False
+    
+
+        
+        
     
     if se_description not in ('',None):
         has_desc_F = True
@@ -4622,9 +4673,13 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     elif nc_detail_description not in ('',None):
         has_desc_A = True
         
+        
     S_or_SN = form.cleaned_data['S_or_SN'] #save or save and notify
     #End adding for additional request Edric Marinas 2024/03/06
 
+
+
+    
     #Start adding For Additional Request Edric Marinas 2024/02/26
     try:
         if se_ro_updated[0] != '1':
@@ -4635,12 +4690,18 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         if se_ro_updated !='1':
             se_ro_updated = '0'
 
+
+
     #Start adding for additional Request Edric Marinas 2024/04/04
     hidden_cancel_reason = form.cleaned_data['hidden_cancel_reason'];
     hidden_request_cancel = form.cleaned_data['hidden_request_cancel'];
     
     #End adding for additional Request Edric Marinas 2024/04/04
     
+
+    
+
+
     try:
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)  
 
@@ -4766,6 +4827,8 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         if edit_cause != '0':
             n.rev_no = n.rev_no + 1
 
+
+
         has_change_A = False
         has_change_B = False
         has_change_C = False
@@ -4776,6 +4839,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         #Edric Marinas 2024/04/04
         if hidden_request_cancel != '7':
         
+            
             #A. Nonconformance detail description
             if (n_source != source or n.other_source != n_other_source or n_classification != classification or n_nc_detail_description != nc_detail_description or n_nc_discovered_by != nc_discovered_by or n_nc_conformed_by != nc_conformed_by.chapano or n_ic_incharge != ic_incharge_chapano) and ic_description in ('', None):        
                 has_change_A = True  
@@ -4945,6 +5009,11 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     
                 if se_description in ('', None):  
                     n.se_ro_updated = None 
+            
+            
+
+        
+        
         
         n.se_ro_updated = se_ro_updated       
         n.comments = comments    
@@ -4957,46 +5026,47 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
             if has_change_A or has_change_B or has_change_C or has_change_D or has_change_E or has_change_F:
                 has_update = True
             
+                
             #update data
+            
             n.save()
             request.session["Message"] = 'NCR data was succesfully updated in database and email notification was sent.'
-        
             #S = save SN = Save and notify
             if S_or_SN == 'SN':
                 #send email notification
                 if edit_cause == '2' not in ('', None):
-                    sendmail_create('E-returnToC', n, login_user_chapa_no)
+                    sendmail_create('E-returnToC', n)
 
                 elif has_change_A:
-                    sendmail_create('A', n, login_user_chapa_no)
+                    sendmail_create('A', n)
 
                 elif has_change_B:   
-                    sendmail_create('B', n, login_user_chapa_no)
+                    sendmail_create('B', n)
 
                 elif has_change_C and has_change_D:
-                    sendmail_create('C&D', n, login_user_chapa_no) 
+                    sendmail_create('C&D', n) 
 
-                elif has_change_C and n. ca_necessary == '1':
-                    sendmail_create('C-Yes', n, login_user_chapa_no)
+                elif has_change_C and n.ca_necessary == '1':
+                    sendmail_create('C-Yes', n)
 
                 elif has_change_C and n.ca_necessary == '0':    
-                    sendmail_create('C-No', n, login_user_chapa_no)
+                    sendmail_create('C-No', n)
 
                 elif has_change_D:    
-                    sendmail_create('D', n, login_user_chapa_no)
+                    sendmail_create('D', n)
 
                 elif n.classification == '2' and n.se_description not in ('', None):  
                     if has_change_E and has_change_F:
-                        sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                        sendmail_create('E-proceedToF', n)
 
                     elif has_change_E:
-                        sendmail_create('E', n, login_user_chapa_no)
+                        sendmail_create('E', n)
 
                     elif has_change_F:    
-                        sendmail_create('F', n, login_user_chapa_no)
+                        sendmail_create('F', n)
 
                     elif classification == '1' and ra_description not in ('', None):
-                        sendmail_create('E', n, login_user_chapa_no)
+                        sendmail_create('E', n)
                       
                         
                 #Start adding for additional request Edric 2024/03/06
@@ -5005,34 +5075,43 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                     if n.classification == '2' and n.se_description not in ('', None):
                         
                         if classification == '1' and ra_description not in ('', None):
-                            sendmail_create('E', n, login_user_chapa_no)
+                            sendmail_create('E', n)
 
                             
                         elif has_desc_F:
-                            sendmail_create('F', n, login_user_chapa_no)
+                            sendmail_create('F', n)
 
                             
                         elif has_desc_E:
-                            sendmail_create('E', n, login_user_chapa_no)
+                            sendmail_create('E', n)
 
                             
                         elif has_desc_E and has_desc_F:
-                            sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                            sendmail_create('E-proceedToF', n)
+                            
+                        
+
                         
                     elif has_desc_D:
-                        sendmail_create('C_approved-y/n', n, login_user_chapa_no)
-     
-                    elif has_desc_C and n.ca_necessary == '0':    
-                        sendmail_create('C-No', n, login_user_chapa_no)
+                        sendmail_create('C_approved-y/n', n)
 
+                        
+                    elif has_desc_C and n.ca_necessary == '0':    
+                        sendmail_create('C-No', n)
+
+                    
                     elif has_desc_C and n.ca_necessary == '1':
-                        sendmail_create('C-Yes', n, login_user_chapa_no)
+                        sendmail_create('C-Yes', n)
+
+                        
                         
                     elif has_desc_B:
-                        sendmail_create('B', n, login_user_chapa_no)
+                        sendmail_create('B', n)
 
+                    
                     elif has_desc_A:
-                        sendmail_create('A', n, login_user_chapa_no)
+                        sendmail_create('A', n)
+
                     
                     else:
                         print(">>>>>>>>>>ERROR")
