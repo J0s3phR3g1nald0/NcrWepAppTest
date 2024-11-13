@@ -182,6 +182,10 @@ class NcrDetailMstr(models.Model):
     se_check_by_qa_status = models.CharField(max_length=1, null=True, blank=True)
     close_date = models.DateTimeField(null=True, blank=True)     
     comments = models.TextField(blank=True, null=True)
+    consumed_mh1 = models.DecimalField(max_digits=4,decimal_places=2)
+    consumed_mh2 = models.DecimalField(max_digits=4,decimal_places=2)
+    consumed_mh3 = models.DecimalField(max_digits=4,decimal_places=2)
+    consumed_mh4 = models.DecimalField(max_digits=4,decimal_places=2)
     
     class Meta:
         managed = False

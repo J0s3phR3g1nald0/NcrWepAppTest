@@ -1359,10 +1359,18 @@
          <label for="classification_2_read_only">Major</label>
       </div>
       <div class="row">
-        <textarea id="nc_detail_description_read_only" class="form-control"  rows="7" cols="75" disabled/>
+        <textarea id="nc_detail_description_read_only" class="form-control"  rows="7" cols="75" disabled>
           {{data.nc_detail_description}}
-        </textarea>         
+        </textarea>
       </div>        
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        <input type="number" class="form-control" style="width: 100px;" id="consumed_mh1_read_only" value="{{data.consumed_mh1}}" disabled>
+        
+        <label>Hours</label>  
+      </div>
+      &nbsp;
     </div>  
     <div class="col-sm-6">
       <div class="row">
@@ -1404,9 +1412,14 @@
          {{form.classification.label}}{{form.classification.0}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.classification.1}} 
       </div>
       <div class="row">
-        {{form.nc_detail_description}}    
+        {{form.nc_detail_description}}   
       </div>
       &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>   
+        {{form.consumed_mh1}}  
+        <label>Hours</label>  
+      </div>
     </div>  
     
     <div class="col-sm-6">
@@ -1422,7 +1435,7 @@
 
       
       <div class="row">
-        <strong>Conformed by: </strong>                     
+        <strong>Confirmed by: </strong>                     
       </div>
       <div class="row">
         {{form.nc_conformed_by.label}}{{form.nc_conformed_by}}&nbsp;{{form.nc_conformed_date.label}}{{form.nc_conformed_date}}  
@@ -1451,7 +1464,15 @@
         <textarea id="ic_description_read_only" class="form-control" rows="4" cols="75" disabled/>
           {{data.ic_description}}
         </textarea> 
-      </div>  
+      </div>
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        <input type="number" class="form-control" style="width: 100px;" id="consumed_mh2_read_only" value="{{data.consumed_mh2}}"  disabled>
+        
+        <label>Hours</label>  
+      </div>
+      &nbsp;
     </div>  
     <div class="col-sm-6">
       <div class="row">
@@ -1495,7 +1516,13 @@
     <div class="col-sm-6">      
       <div class="row">
         {{form.ic_description}}  
-      </div>  
+      </div> 
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        {{form.consumed_mh2}}
+        <label>Hours</label>  
+      </div>
     </div>  
     <div class="col-sm-6">
       <div class="row">
@@ -1540,6 +1567,14 @@
           {{data.rca_description}}
         </textarea> 
       </div>
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        <input type="number" class="form-control" style="width: 100px;" id="consumed_mh3_read_only" value="{{data.consumed_mh3}}" disabled>  
+        
+        <label>Hours</label>  
+      </div>
+      &nbsp;
       <div class="row">
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    
@@ -1585,6 +1620,12 @@
     <div class="col-sm-6">
       <div class="row">
         {{form.rca_description}}
+      </div>
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        {{form.consumed_mh3}}
+        <label>Hours</label>  
       </div>
       <div class="row">
       
@@ -1654,7 +1695,15 @@
         <textarea name="ca_description" id="ca_description_read_only" class="form-control"  rows="4" cols="75" disabled/>
           {{data.ca_description}}
         </textarea>       
-      </div>        
+      </div>   
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        <input type="number" class="form-control" style="width: 100px;" id="consumed_mh4_read_only" value="{{data.consumed_mh4}}" disabled>
+        
+        <label>Hours</label>  
+      </div>
+      &nbsp;     
     </div>  
     <div class="col-sm-6">
       <div class="row">
@@ -1709,7 +1758,13 @@
       </div>
       <div class="row">
         {{form.ca_description}}   
-      </div>        
+      </div> 
+      &nbsp;
+      <div class="row">
+        <strong>Consumed MH: </strong>  
+        {{form.consumed_mh4}}
+        <label>Hours</label>  
+      </div>       
     </div>  
     <div class="col-sm-6">
       <div class="row">
@@ -2837,6 +2892,10 @@ let ra_description = document.getElementById('ra_description');
 let ra_check_by_sh = document.getElementById('ra_check_by_sh');
 let ra_action_effective_2 = document.getElementById('ra_action_effective_2');
 let ra_followup_date = document.getElementById('ra_followup_date');
+let consumed_mh1 = document.getElementById('consumed_mh1');
+let consumed_mh2 = document.getElementById('consumed_mh2');
+let consumed_mh3 = document.getElementById('consumed_mh3');
+let consumed_mh4 = document.getElementById('consumed_mh4');
 
 
 function SubmitValidiation(){
@@ -2887,7 +2946,7 @@ function SubmitValidiation(){
         }
     }
     if(document.getElementById('forUpdateA').style.display != 'none'){
-        //console.log("A");
+        
         if(classification_0.checked || classification_1.checked){
             classification_0.className = "form-control radio-inline";
             classification_1.className = "form-control radio-inline";
@@ -2918,6 +2977,15 @@ function SubmitValidiation(){
         else{
             nc_discovered_by.className = "form-control";
         }
+        
+        if(consumed_mh1.value === ""){
+            console.log("TESTAB");
+            element_scroll_into = consumed_mh1;
+            consumed_mh1.className = "form-control error";
+        }
+        else{
+          consumed_mh1.className = "form-control";
+        }
     }
     if(document.getElementById('forUpdateB').style.display != 'none'){
         console.log("B");
@@ -2935,6 +3003,14 @@ function SubmitValidiation(){
         else{
             ic_approve_by.className = "form-control";
         }
+
+        if(consumed_mh2.value === ""){
+            element_scroll_into = consumed_mh2;
+            consumed_mh2.className = "form-control error";
+        }
+        else{
+          consumed_mh2.className = "form-control";
+        }
     }
     if(document.getElementById('forUpdateC').style.display != 'none'){
         console.log("C");
@@ -2947,6 +3023,13 @@ function SubmitValidiation(){
         }
         else{
             rca_description.className = "form-control";
+        }
+        if(consumed_mh3.value === ""){
+            element_scroll_into = consumed_mh3;
+            consumed_mh3.className = "form-control error";
+        }
+        else{
+          consumed_mh3.className = "form-control";
         }
         
         if(!classification_2_read_only.checked){
@@ -2998,6 +3081,13 @@ function SubmitValidiation(){
         }
         else{
             ca_approved_by_mgr.className = "form-control";
+        }
+        if(consumed_mh4.value === ""){
+            element_scroll_into = consumed_mh4;
+            consumed_mh4.className = "form-control error";
+        }
+        else{
+          consumed_mh4.className = "form-control";
         }
     }
     var action_effective_proceed2F = false;
@@ -3061,7 +3151,7 @@ function SubmitValidiation(){
 
 //Start modifying for additional request Edric Marinas 2024/03/06
 function saveNF(a){
-    
+  
     
     if (SubmitValidiation() != ""){
         

@@ -140,6 +140,17 @@ class NCRCreateForm(forms.Form):
         help_text='Write your message here!',
         max_length=500)
 
+    consumed_mh1 = forms.DecimalField(required=False, max_digits=4, decimal_places=2,
+        widget=forms.NumberInput(attrs={ 'class': 'form-control', 'id':'consumed_mh1','size':4, 'style' : 'width:100px'}))
+    
+    consumed_mh2 = forms.DecimalField(required=False, max_digits=4, decimal_places=2,
+        widget=forms.NumberInput(attrs={ 'class': 'form-control', 'id':'consumed_mh2','size':4, 'style' : 'width:100px'}))   
+    
+    consumed_mh3 = forms.DecimalField(required=False, max_digits=4, decimal_places=2,
+        widget=forms.NumberInput(attrs={ 'class': 'form-control', 'id':'consumed_mh3','size':4, 'style' : 'width:100px'}))   
+    
+    consumed_mh4 = forms.DecimalField(required=False, max_digits=4, decimal_places=2,
+        widget=forms.NumberInput(attrs={ 'class': 'form-control', 'id':'consumed_mh4','size':4, 'style' : 'width:100px'}))   
 
     #EdricEmail
     nc_discovered_by_email = forms.EmailField(
