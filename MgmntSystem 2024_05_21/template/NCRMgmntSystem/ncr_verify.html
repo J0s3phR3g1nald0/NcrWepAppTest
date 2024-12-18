@@ -75,7 +75,7 @@
         border: 2px solid white;
     }
 
-    .sdmiheader {padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#1F45FC}
+    .sdmiheader {padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#4682B4}
    
     .sdmifooter {border-top:1px solid rgba(0,0,0,0.2);width:100%;bottom:0;position:fixed;padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#eee}
     
@@ -287,7 +287,9 @@
 
 <nav class="navbar navbar-inverse">
     <div class="sdmiheader text-center" style="margin-bottom:0">
-      <img src="{% static 'NCRMgmntSystem/images/sdmi-horizontal.gif' %}" alt="sdmi" title="sdmi" />  
+      <h1 style="font-family: Century Gothic; font-size: x-large;color: #eee;">SHI Designing and Manufacturing, Inc.</h1>
+      <hr style="width: 450px;margin: auto;margin-bottom: 0;">
+      <h1 style="font-family: Century Gothic;font-size: x-large;color: #eee;margin-right: 280px;margin-top: 10px;">株式会社 SDMI</h1>
     </div>
 
 
@@ -428,9 +430,9 @@
   </div>
   
 {% if check_phase != '0' and from_email_id == ncrDetailMstr.nc_conformed_by %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
 {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
 {%else%}
   <div class="row" style="background-color:#E5E4E2;">
 {%endif%}
@@ -440,7 +442,7 @@
     </div>    
   </div>
 
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -450,9 +452,9 @@
   </div>
   
   {% if check_phase != '0' and from_email_id == ncrDetailMstr.nc_conformed_by and ncrDetailMstr.nc_conformed_date|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {%else%}
   <div class="row" style="background-color:#E5E4E2;">
   {%endif%}
@@ -541,7 +543,7 @@
     </div>          
   </div>
   
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -551,9 +553,9 @@
   </div>
   
 {% if check_phase != '0' and from_email_id == ncrDetailMstr.ic_approve_by and ncrDetailMstr.ic_approve_date|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
 {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
 {%else%}
   <div class="row" style="background-color:#E5E4E2;">
 {%endif%}
@@ -610,7 +612,7 @@
     </div>          
   </div>
   
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -620,11 +622,11 @@
   </div>
   
   {% if check_phase != '0' and from_email_id == ncrDetailMstr.rca_approve_by and ncrDetailMstr.rca_approve_date|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.ca_approved_by_mgr and ncrDetailMstr.ca_approved_date_by_mgr|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   
   {%else%}
   <div class="row" style="background-color:#E5E4E2;">
@@ -684,7 +686,7 @@
 
 {% if ncrDetailMstr.ca_necessary != '0' %}
 
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -694,11 +696,11 @@
   </div>
   
   {% if check_phase != '0' and from_email_id == ncrDetailMstr.ca_checked_by_sh and ncrDetailMstr.ca_check_date_by_sh|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.ca_approved_by_mgr and ncrDetailMstr.ca_approved_date_by_mgr|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {%else%}
   <div class="row" style="background-color:#E5E4E2;">
   {%endif%}
@@ -786,7 +788,7 @@
     </div>          
   </div>
   
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -796,11 +798,11 @@
   </div>
   
   {% if check_phase != '0' and from_email_id == ncrDetailMstr.ra_check_by_sh and ncrDetailMstr.ra_check_date_by_sh|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr and ncrDetailMstr.se_check_date_by_mgr|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {%else%}
   <div class="row" style="background-color:#E5E4E2;">
   {%endif%}
@@ -856,7 +858,7 @@
     </div>          
   </div>
   
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -866,11 +868,11 @@
   </div>
   
   {% if check_phase != '0' and from_email_id == ncrDetailMstr.ra_check_by_sh and ncrDetailMstr.ra_check_date_by_sh|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr and ncrDetailMstr.se_check_date_by_mgr|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {% elif check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.se_check_date_by_qa|date:"Y-m-d" == '' %}
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
   {%else%}
   <div class="row" style="background-color:#E5E4E2;">
   {%endif%}

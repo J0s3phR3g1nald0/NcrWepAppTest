@@ -640,7 +640,7 @@
         box-shadow: 0 0 5px 0px red inset;
    }
 
-   .sdmiheader {padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#1F45FC}
+   .sdmiheader {padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#4682B4}
    
    .sdmifooter {border-top:1px solid rgba(0,0,0,0.2);width:100%;bottom:0;position:fixed;padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#eee}
 
@@ -678,9 +678,11 @@
     <div id="loader" class="center"></div>
     
 <nav class="navbar navbar-inverse">
-    <div class="sdmiheader text-center" style="margin-bottom:0;">
-      <img src="{% static 'NCRMgmntSystem/images/sdmi-horizontal.gif' %}" alt="sdmi" title="sdmi" />
-    </div>
+  <div class="sdmiheader text-center" style="margin-bottom:0">
+    <h1 style="font-family: Century Gothic; font-size: x-large;color: #eee;">SHI Designing and Manufacturing, Inc.</h1>
+    <hr style="width: 450px;margin: auto;margin-bottom: 0;">
+    <h1 style="font-family: Century Gothic;font-size: x-large;color: #eee;margin-right: 280px;margin-top: 10px;">株式会社 SDMI</h1>
+  </div>
 
 
   <div class="container-fluid">
@@ -1264,7 +1266,7 @@
     </div>
   </div>
   
-  <div class="row" id="forUpdateNcr" style="background-color:powderblue;">
+  <div class="row" id="forUpdateNcr" style="background-color:lightblue;">
     &nbsp;
     <div class="col-sm-5">
       <h3><strong>NONCONFORMANCE REPORT<br>&nbsp;&nbsp;&nbsp;&nbsp;AND CORRECTIVE ACTION(New)</strong></h3>        
@@ -1320,13 +1322,13 @@
     </div>    
   </div>
   
-  <div class="row" id="forUpdateSrc" style="background-color:powderblue;">
+  <div class="row" id="forUpdateSrc" style="background-color:lightblue;">
     <div class="col-sm-12">
       {{form.source.label}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.0}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.1}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.2}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.3}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.4}}&nbsp;&nbsp;&nbsp;&nbsp;{{form.source.5}}&nbsp;{{form.other_source}}
     </div>    
   </div>
   
-  <div class="row form-inline" style="background-color:powderblue;">
+  <div class="row form-inline" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row form-group">
         <h5><strong>
@@ -1402,7 +1404,7 @@
     </div>          
   </div>
   
-  <div class="row" id="forUpdateA" style="background-color:powderblue;">
+  <div class="row" id="forUpdateA" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1449,7 +1451,7 @@
     </div>     
   </div>
   
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row">
         <h5><strong>
@@ -1512,7 +1514,7 @@
     </div>          
   </div>
   
-  <div class="row" id="forUpdateB" style="background-color:powderblue;">
+  <div class="row" id="forUpdateB" style="background-color:lightblue;">
     <div class="col-sm-6">      
       <div class="row">
         {{form.ic_description}}  
@@ -1550,7 +1552,7 @@
     </div>          
   </div>
   
-  <div class="row" style="background-color:powderblue;">
+  <div class="row" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row">
         <h5><strong>
@@ -1616,7 +1618,7 @@
     </div>          
   </div>
   
-  <div class="row" id="forUpdateC" style="background-color:powderblue;">
+  <div class="row" id="forUpdateC" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
         {{form.rca_description}}
@@ -1673,7 +1675,7 @@
     </div>          
   </div>
   
-  <div id="forHeaderD" class="row" style="background-color:powderblue;">
+  <div id="forHeaderD" class="row" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row">
         <h5><strong>
@@ -1745,7 +1747,7 @@
     </div>          
   </div>
    
-  <div class="row" id="forUpdateD" style="background-color:powderblue;">
+  <div class="row" id="forUpdateD" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -1782,7 +1784,7 @@
     </div>          
   </div>
   
-  <div id="forHeaderE" class="row" style="background-color:powderblue;">
+  <div id="forHeaderE" class="row" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
         <h5><strong>
@@ -1856,7 +1858,7 @@
     </div>          
   </div>
   
-  <div class="row" id="forUpdateE" style="background-color:powderblue;">
+  <div class="row" id="forUpdateE" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div id="ra_description_upd" class="row">
         {{form.ra_description}}  
@@ -1893,7 +1895,7 @@
     </div>          
   </div>
    
-  <div id="forHeaderF" class="row" style="background-color:powderblue;">
+  <div id="forHeaderF" class="row" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
         <h5><strong>
@@ -2008,7 +2010,7 @@
     </div>          
   </div>
   
-  <div class="row" id="forUpdateF" style="background-color:powderblue;">
+  <div class="row" id="forUpdateF" style="background-color:lightblue;">
     <div class="col-sm-6">
       <div class="row">
        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -2072,7 +2074,7 @@
   </div>
 
  
-  <div class="row" id="comments" style="background-color:powderblue;">
+  <div class="row" id="comments" style="background-color:lightblue;">
     <div class="col-sm-12">
       <div class="row">
         {{form.comments.label}}
