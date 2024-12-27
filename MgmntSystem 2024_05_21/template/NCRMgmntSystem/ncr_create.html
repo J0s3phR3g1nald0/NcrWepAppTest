@@ -789,14 +789,14 @@
 </div> 
 
 
-<div id="confirm_4" class="modal fade">
+<div id="confirm_reset" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
 			<div class="modal-header flex-column">
 				<div class="icon-box">
 					<i class="material-icons">&#xE5CD;</i>
 				</div>						
-				<h4 class="modal-title w-100">Do you want to continue?</h4>	                
+				<h4 class="modal-title w-100">RESET</h4>	                
 			</div>
 			<div class="modal-body">
 				<p> If you click [<b>CONTINUE</b>] button, your inputs will be not be saved in database and<br> 
@@ -811,8 +811,10 @@
 			</div>
 		</div>
 	</div>
-</div>  
+</div> 
 
+
+<!--
 <div id="confirm_3" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -854,6 +856,7 @@
 		</div>
 	</div>
 </div>  
+-->
 
 <div id="confirm_1" class="modal fade">
 	<div class="modal-dialog">
@@ -884,19 +887,28 @@
 			<div class="modal-header flex-column">
 				<div class="icon-box">
 					<i class="material-icons">&#xE5CD;</i>
-				</div>						
-				<h4 class="modal-title w-100">Do you want to continue?</h4>	                
+          
+				</div>
+        <h4 class="modal-title w-100">REMINDER</h4>						
+				<!--<h4 class="modal-title w-100">Do you want to continue?</h4>-->	 
 			</div>
 			<div class="modal-body">
-				<p>    For major NCRs, it is necessary that your Risk and Oppurtunity is updated.<br>
+				<!--<p>    For major NCRs, it is necessary that your Risk and Oppurtunity is updated.<br>
 				   If you click [<b>CONTINUE</b>] button, your changes will be saved in database and email <br>
 				   notification will be send to checker/s, but it is possible that it will be rejected by QA<br> 
 				   or be pending for NCR closing until you update your Risk and Oppurtunity.
+				</p>-->
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It is necessary that your Risk and Oppurtunity is updated.
+				   before sending notification to chekers. Click [<b>CONTINUE</b>] button to close this message. 
+           Update your Risk and Oppurtunity first, <br>then fill-up NCR info again.<br>
+				   <b>NOTE: Only NCR with updated Risk and Oppurtunity can be close.</b>
 				</p>
 			</div>
 			<div class="modal-footer justify-content-center">
-				<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+				<!--<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
 				<button type="submit" class="btn btn-success" id="save" name="save" value="Save">Continue</button>
+      -->
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Continue</button>
 			</div>
 		</div>
 	</div>
@@ -928,9 +940,6 @@
 	</div>
 </div>   
 <!-- End Adding Edric Marinas 2024/04/19 -->
-
-
-
 
 <div class="modal fade" id="modalForA" tabindex="-1" role="dialog" aria-labelledby="modalForA1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-scrollable" role="document">
@@ -1136,7 +1145,7 @@
     <!-- <button type="button" class="btn btn-primary active save-btn" name="btnSave" id="btnSave">-->
     
     <button type="button" class="btn btn-primary active save-btn" name="btnSave" id="btnSave" value="S" onclick="saveNF(this.value)">
-      <span class="glyphicon glyphicon-floppy-save"></span> Save
+      <span class="glyphicon glyphicon-floppy-save"></span> Save Only
     </button>
     
     
@@ -1872,7 +1881,8 @@
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{form.ra_action_effective.2}}&nbsp;        
-        <div class="input-group date">
+        
+         <div class="input-group date">
           {{form.ra_followup_date}}<span class="input-group-addon"><i class="glyphicon glyphicon-calendar" id="ra_followup_date_picker"></i></span>
         </div> 
         
@@ -2634,8 +2644,8 @@
 
           
         $("#btnContinueSave").click(function () {
-            var ncrNo = $('#id_ncr_no').val();  //acquire ncr_no 
 
+            var ncrNo = $('#id_ncr_no').val();  //acquire ncr_no 
 
             if (ncrNo != '') {
                 var hidden_update_date = $('#hidden_update_date').val();          
@@ -2649,44 +2659,45 @@
                     success: function (data) {   
                         if (data.isLatest == 'TRUE') {
                             $("#process").val("save");
-                            if($('#ra_description').val() != '') { 
-                                if ($("input[name='classification']:checked").val() == '2' && $('#se_description').val() == '') {                
-                                    $("#confirm_1").modal("show");
-
-                                    document.getElementById("se_ro_updated_0").scrollIntoView({block:"center",behavior:"smooth"});         
-                                } else if ($("input[name='classification']:checked").val() == '2' && $("input[name='se_ro_updated']:checked").val() != '1') { 
-                                    
-                                    //<!--Start modifying 2024/04/19 Edric 
-                                    //$("#confirm_2").modal("show");-->
-                                    
-                                    
-                                    var S_or_SN = document.getElementById('S_or_SN');
-                                    if(S_or_SN.value == "S"){
-                                        $("#confirm_2_saveOnly").modal("show");
-                                        if(!se_ro_updated_0.checked){
-                                            se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
-
-                                            se_ro_updated_0.className = "form-control radioErr";
-                                        }
-                                    }
-                                    else{
-                                        $("#confirm_2").modal("show");
-                                        if(!se_ro_updated_0.checked){
-                                            se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
-
-                                            se_ro_updated_0.className = "form-control radioErr";
-                                        }
-                                        
-
-                                    }
-                                     
-                                    //<!--End modifying 2024/04/19 Edric  -->
-                                } else {
-                                    $("#ncrCreateForm").submit(); 
-                                }
-                            } else {
+                            
+                            //if($('#ra_description').val() != '') { 
+                            //    if ($("input[name='classification']:checked").val() == '2' && $('#se_description').val() == '') {                
+                            //        $("#confirm_1").modal("show");
+                            //
+                            //        document.getElementById("se_ro_updated_0").scrollIntoView({block:"center",behavior:"smooth"});         
+                            //    
+                            //    } else if ($("input[name='classification']:checked").val() == '2' && $("input[name='se_ro_updated']:checked").val() != '1') { 
+                            //        
+                            //        //<!--Start modifying 2024/04/19 Edric 
+                            //        //$("#confirm_2").modal("show");-->
+                            //        
+                            //        var S_or_SN = document.getElementById('S_or_SN');
+                            //        
+                            //        if(S_or_SN.value == "S"){
+                            //            $("#confirm_2_saveOnly").modal("show");
+                            //            if(!se_ro_updated_0.checked){
+                            //                se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
+                            //  
+                            //                //se_ro_updated_0.className = "form-control radioErr";
+                            //            }
+                            //        }
+                            //        else{
+                            //            $("#confirm_2").modal("show");
+                            //            if(!se_ro_updated_0.checked){
+                            //                se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
+                            //
+                            //                //se_ro_updated_0.className = "form-control radioErr";
+                            //            }
+                            //        }
+                            //         
+                            //        //<!--End modifying 2024/04/19 Edric  -->
+                            //    } else {
+                            //        $("#ncrCreateForm").submit(); 
+                            //    }
+                            
+                            //} else {
                                 $("#ncrCreateForm").submit(); 
-                            }                                                                                     
+                            //}                                                                                     
                         } else {    
                             $("#success_msg").html("");                   
                             $("#err_msg").html("<h3><font color='red'>At " + data.latest_update_date + ", this NCR was already updated by " + data.latest_update_by + "<br>Click Reset button to acquire latest status.</font></h3>");
@@ -2694,6 +2705,7 @@
                     }
                 });   
             } else {
+
                 $("#process").val("save");
 
                 if($('#ra_description').val() != '') { 
@@ -2711,14 +2723,14 @@
                             if(!se_ro_updated_0.checked){
                                 se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
 
-                                se_ro_updated_0.className = "form-control radioErr";
+                                //se_ro_updated_0.className = "form-control radioErr";
                             }
                         }
                         else{
                             $("#confirm_2").modal("show");
                             if(!se_ro_updated_0.checked){
                                 se_ro_updated_0.scrollIntoView({block:"center",behavior:"smooth"}); 
-                                se_ro_updated_0.className = "form-control radioErr";
+                                //se_ro_updated_0.className = "form-control radioErr";
                             }
                         }                
                         //<!--End modifying 2024/04/19 Edric -->
@@ -2736,7 +2748,7 @@
 
 
         $("#btnReset").click(function () {
-            $("#confirm_4").modal("show");   
+            $("#confirm_reset").modal("show");   
         });
         
         //<!-- Start modification for additional request Edric 20204/04/01 -->
@@ -2903,6 +2915,7 @@ let consumed_mh4 = document.getElementById('consumed_mh4');
 function SubmitValidiation(){
     var error_count = 0;
     var element_scroll_into = ""
+    var errors = ""
     if(document.getElementById('forUpdateNcr').style.display != 'none'){
           console.log("forUpdateNcr");
           //let ncr_issue_date = document.getElementById('ncr_issue_date');  
@@ -3109,13 +3122,19 @@ function SubmitValidiation(){
         else{
             ra_check_by_sh.className = "form-control";
         }
-        if(ra_action_effective_2.checked){
+        if(ra_action_effective_2.checked) {
             if(ra_followup_date.value === ""){
                 element_scroll_into = ra_followup_date;
                 ra_followup_date.className = "form-control error";
-            }
-            else{
-                ra_followup_date.className = "form-control";
+            } else{
+              
+                if (isNaN(new Date($('#ra_followup_date').val()))) {
+                    ra_followup_date.className = "form-control error";   
+                    errors = "・　Invalid date.<br>"
+                    
+                } else {
+                    ra_followup_date.className = "form-control";
+                }
             }
         }
         if (ra_action_effective_0.checked){
@@ -3127,10 +3146,19 @@ function SubmitValidiation(){
         if(action_effective_proceed2F == true && se_description.value === ""){
             element_scroll_into = se_description;
             se_description.className = "form-control error";
-        }
-        else{
+        } else{
             se_description.className = "form-control";
-        }        
+        }       
+        
+        if (action_effective_proceed2F == true  && se_ro_updated_0.checked == false) {
+            element_scroll_into = se_ro_updated_0;
+            se_ro_updated_0.className = "form-control radioErr";
+
+            $("#confirm_2").modal("show");
+        } else {
+          se_ro_updated_0.className = "form-control";
+        }
+
         if(se_check_by_mgr.value === ""){
             element_scroll_into = se_check_by_mgr;
             se_check_by_mgr.className = "form-control error";
@@ -3147,53 +3175,61 @@ function SubmitValidiation(){
             se_check_by_qa[0].className = "form-control";
         }  
     }
-    return element_scroll_into;
+    
+    //return element_scroll_into;
+
+    if (element_scroll_into != '') {
+      errors = errors + "・　Highlighted fields are required.<br>"
+    } 
+
+    return errors
 }
 //End 2024/05/15
 
 //Start modifying for additional request Edric Marinas 2024/03/06
 function saveNF(a){
-  
+    $("#success_msg").html("");
+    $("#err_msg").html("");
     
     if (SubmitValidiation() != ""){
-        
         try{
             SubmitValidiation().scrollIntoView({block:"center",behavior:"smooth"});
-        }
-        catch(err){
+        }  catch(err){
             console.log(SubmitValidiation());
         }
-                
-        
-        $("#err_msg").html("<h4><font color=red>Highlighted fields are required.</font></h4>");
-    }
-    else if(a == "SN1"){ //I forgot the purpose of this condition  but keep In case I put it to avoid bugs
+                 
+        //$("#err_msg").html("<h4><font color=red>Highlighted fields are required.</font></h4>");
+        var errorMessage = "<h4><font color=red>" + SubmitValidiation() + "</font></h4>"
+        //$("#err_msg").html("<h4><font color=red>Highlighted fields are required.</font></h4>");
+        $("#err_msg").html(errorMessage);
     
-        $("#err_msg").html("");
+      } else if(a == "SN1") { //I forgot the purpose of this condition  but keep In case I put it to avoid bugs
+    
         a = "SN";
         S_or_SN = document.getElementById('S_or_SN');
         S_or_SN.value = a; 
         var button = document.getElementById('btnContinueSave');
         button.form.submit();
-    }
     
-    else{ 
-        $("#err_msg").html("");
+      } else { 
         S_or_SN = document.getElementById('S_or_SN');
         S_or_SN.value = a; 
+        selected_ra_action_effective_value = $("input[name='ra_action_effective']:checked").val();
         
-        if(a == "S"){
-            document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, your inputs will be saved in database and no notification will be sent."
-        }
-        else if(a == "SN"){
-            document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, your inputs will be saved in database and email <br> notification will be send to checker/s."
-        }
+        if (selected_ra_action_effective_value == '2') {
+            ra_followup_date = $("input[name='ra_followup_date']").val();
+            document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>only save</b> your inputs in database but will <b>not send</b> notification because <b>F. Show Effectiveness</b> has no input yet.<br> Please follow-up on this NCR on or before <b>"  
+                + ra_followup_date + "</b>."    
+        } else { 
+            if (a == "S") {
+                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>only save</b> your inputs in database but will <b>not send</b> notification."
+            } else if (a == "SN") {
+                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>save</b> your inputs in database and <b>send</b> <br> notification to checker/s."
+            }
+        } 
+
         $("#confirm_3").modal("show");
     }
-     
-     
-     
-     
 }
 //End modifying for additional request Edric Marinas 2024/03/06
 

@@ -842,7 +842,8 @@
         {% elif ncrDetailMstr.ra_check_by_sh_status == '0' %}
           <span class="glyphicon glyphicon-remove"></span>    
         {% endif %}
-        {% if check_phase != '0' and from_email_id == ncrDetailMstr.ra_check_by_sh and ncrDetailMstr.ca_approve_by_mgr_status == '1' and ncrDetailMstr.se_check_date_by_mgr|date:"Y-m-d" == '' %}
+
+        {% if check_phase != '0' and from_email_id == ncrDetailMstr.ra_check_by_sh and ncrDetailMstr.ca_approve_by_mgr_status == '1' and ncrDetailMstr.se_check_date_by_mgr|date:"Y-m-d" == '' and ncrDetailMstr.ra_action_effective != '2' %}
           {% if ncrDetailMstr.ra_check_by_sh_status != '1' %}
             <input type="button" class="btn btn-success" name="acceptE" value="Accept" onclick="javascript:validateAccept('acceptE1F1');">  
           {% else %}
@@ -914,7 +915,7 @@
         -->
         
 
-        {% if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr and ncrDetailMstr.close_date|date:"Y-m-d" == '' and ncrDetailMstr.se_description != None %}
+        {% if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr and ncrDetailMstr.close_date|date:"Y-m-d" == '' and ncrDetailMstr.se_description != None and ncrDetailMstr.ra_action_effective != '2' %}
         
         <!-- End modify due to bug Edric 2024/03/13 -->
         
@@ -953,7 +954,7 @@
           <span class="glyphicon glyphicon-remove"></span>    
         {% endif %}
         
-        {% if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.close_date|date:"Y-m-d" == '' %}        
+        {% if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_qa and ncrDetailMstr.close_date|date:"Y-m-d" == '' and ncrDetailMstr.ra_action_effective != '2' %}        
           {% if ncrDetailMstr.se_check_by_mgr_status != '1' %}
             <input type="button" class="btn btn-success" name="acceptE3F3" value="Accept" disabled/>
             <button type="button" class="btn btn-danger" name="denyE3F3" value="denyD2" disabled>Deny</button>

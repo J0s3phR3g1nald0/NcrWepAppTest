@@ -1,4 +1,5 @@
 from django.shortcuts import render
+
 from .models import Employee, Rank, Dept
 from .models import NcrDetailMstr, NcrAdvUserTbl, Project, DenyReason
 from django.db import connection
@@ -21,21 +22,19 @@ MAX_ROWS_PER_PAGE = 10
 
 #For Local Test Server (Development)
 #PROJ_URL = 'http://127.0.0.1:8000/ncr/'
-PROJ_URL = 'http://localhost:8080/ncr/'
+#PROJ_URL = 'http://localhost:8080/ncr/'
 
 #For Integration Test Server (Development)
 #PROJ_URL = 'http://ncr.sdmi.shi.co.jp:82/ncr/'
 
 #For Real Server (Deployment)
-#PROJ_URL = 'http://mgmntsystem.sdmi.shi.co.jp/ncr/'
+PROJ_URL = 'http://mgmntsystem.sdmi.shi.co.jp/ncr/'
 
 #NCOA04_01
 #Logic for displaying log-in page
 
 def login_view(request):
     print('START: login_view')
-
-
 
     form = LoginForm()
     #form = LoginForm(initial={'chapano': '?', 'password': ''})   
@@ -47,9 +46,6 @@ def login_view(request):
 #Save variables in session then displays the 'Create NCR' page if inputs are valid otherwise display error messages on log-in page
 def login(request):
     print('START: login')
-
-
-
 
     form = None
     e = None
@@ -499,7 +495,6 @@ def project_update(request, id):
                 else:
                     
                     try:  
-                        print(">>>TESSSETTTTTTINGG")
                         p = Project.objects.get(id=id)
                         p.name = name
                         p.archive_location = archive_location
@@ -720,7 +715,7 @@ def ncr_search_view_init(request):
                          n.nc_detail_description as nc_detail_description, 
                          d.name as dept_id, 
                          p.name as project_id, 
-                         e1.chapaNo as ic_incharge, 
+                         n.ic_incharge, 
                          CONCAT(e1.lastName, ', ', e1.firstName, ' ', e1.middleName) as ic_incharge_name, 
                          CASE WHEN coalesce(n.nc_detail_description, '') != '' AND coalesce(n.ic_description, '') = '' THEN 'A. Nonconformance detail description' 
                              WHEN coalesce(n.ic_description, '') != '' AND coalesce(n.rca_description, '') = '' THEN 'B. Immediate Correction' 
@@ -730,21 +725,44 @@ def ncr_search_view_init(request):
                              WHEN coalesce(n.se_description, '') != '' THEN 'F. Show Effectiveness'           
                          END as progress,
                          n.update_user_id as update_user_id,
-                         CASE WHEN n.status = '1' THEN 'Issued' 
+                         CASE WHEN n.ra_action_effective = '2' THEN 'For Follow-up'  
+                             WHEN n.status = '1' THEN 'Issued' 
                              WHEN n.status = '2' THEN 'Cancelled' 
                              WHEN n.status = '3' THEN 'Accepted' 
                              WHEN n.status = '4' THEN 'On-going' 
                              WHEN n.status = '5' THEN 'Closed' 
-                             WHEN n.status = '7' THEN 'Cancel Request' 
+                             WHEN n.status = '7' THEN 'Cancel Request'
                              ELSE '' 
                          End as status,
-                         n.ncr_issue_by,
-                         n.nc_conforme_status
+                         coalesce(n.ncr_issue_by, '') as ncr_issue_by,
+                         coalesce(n.nc_conforme_status, '') as nc_conforme_status,
+                         coalesce(n.ic_approve_status, '') as ic_approve_status,
+                         coalesce(n.rca_incharge, '') as rca_incharge,
+                         coalesce(n.rca_approve_status, '') as rca_approve_status,
+                         coalesce(n.ra_check_by_staff, '') as ra_check_by_staff,
+                         coalesce(n.ra_check_by_sh_status, '') as ra_check_by_sh_status,
+                         coalesce(n.ca_approve_by_mgr_status, '') as ca_approve_by_mgr_status,
+                         CASE
+                            WHEN coalesce(n.close_date, '') != '' THEN 'CLOSE' 
+                            WHEN coalesce(n.nc_conforme_status, '') = '' THEN n.nc_conformed_by
+                            WHEN coalesce(n.nc_conforme_status, '') = '0' THEN n.ncr_issue_by
+                            WHEN coalesce(n.nc_conforme_status, '') = '1' and (coalesce(n.ic_approve_status, '') = '0' or coalesce(n.ic_create_date, '') = '') THEN n.ic_incharge
+                            WHEN coalesce(n.ic_create_date, '') != '' and coalesce(n.ic_approve_status, '') = '' THEN n.ic_approve_by
+                            WHEN coalesce(n.ic_approve_status, '') = '1' and (coalesce(n.rca_create_date, '') = '' or coalesce(n.rca_approve_status, '') = '0' or coalesce(n.ca_check_by_sh_status, '') = '0' or coalesce(n.ca_approve_by_mgr_status, '') = '0') THEN coalesce(n.rca_incharge, n.ic_incharge)
+                            WHEN coalesce(n.rca_create_date, '') != '' and coalesce(n.rca_approve_status, '') = '' THEN 'n.rca_approve_by'
+                            WHEN coalesce(n.rca_approve_status, '') = '1' and coalesce(n.ca_check_by_sh_status, '') = '' THEN 'n.ca_checked_by_sh'
+	                        WHEN coalesce(n.ca_check_by_sh_status, '') = '1' and coalesce(n.ca_approve_by_mgr_status, '') = '' THEN n.ca_approved_by_mgr
+                            WHEN coalesce(n.ca_approve_by_mgr_status, '') = '1' and (coalesce(n.ra_check_date_by_staff, '') = '' or coalesce(n.ra_check_by_sh_status, '') = '0' or coalesce(n.se_check_by_mgr_status, '') = '0' or coalesce(n.se_check_by_qa_status, '') = '0' or coalesce(n.ra_action_effective, '') = '2' ) THEN coalesce(n.ra_check_by_staff, n.rca_incharge)
+                            WHEN coalesce(n.ra_check_date_by_staff, '') != '' and coalesce(n.ra_check_by_sh_status, '') = '' THEN n.ra_check_by_sh
+                            WHEN coalesce(n.ra_check_by_sh_status, '') = '1' and coalesce(n.se_check_by_mgr_status, '') = ''  THEN n.se_check_by_mgr
+                            WHEN coalesce(n.se_check_by_mgr_status, '') = '1' and coalesce(n.se_check_by_qa_status, '') = ''  THEN n.se_check_by_qa
+                            ELSE ''
+                        END as current_in_charge
                      FROM NCR_DETAIL_MSTR n
                          LEFT JOIN DEPT d ON (trim(n.dept_id) =  trim(d.id))
                          LEFT JOIN PROJECT p ON (n.project_id =  p.id AND trim(n.dept_id = p.dept_id))
                          LEFT JOIN EMPLOYEE e1 ON (n.ic_incharge =  e1.chapaNo)                         
-                     WHERE n.delete_date IS NULL"""   
+                     WHERE n.ncr_no IS NOT NULL"""         
         
         if not (isGrpMgr or isQA or isAdmin):             
             if not (isSH or isChecker): 
@@ -755,10 +773,14 @@ def ncr_search_view_init(request):
         
         sqlStmt = sqlStmt + " ORDER BY n.update_date DESC"    
         
-        sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
+        #sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
+        #sqlStmtX = sqlStmtX + sqlStmt
+        #sqlStmtX = sqlStmtX + ") a;"
+        sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num, "
+        sqlStmtX = sqlStmtX + "CASE WHEN a.current_in_charge = 'CLOSE' THEN '★' ELSE CONCAT(e2.lastName, ', ', e2.firstName, ' ', e2.middleName) END as current_incharge_name from ("
         sqlStmtX = sqlStmtX + sqlStmt
-        sqlStmtX = sqlStmtX + ") a;"
-        
+        sqlStmtX = sqlStmtX + ") a LEFT JOIN EMPLOYEE e2 ON (a.current_in_charge = e2.chapaNo);"
+
         try:
             cursor=connection.cursor()
             cursor.execute("SET @rownum:=0;")
@@ -842,13 +864,8 @@ def ncr_search_view(request):
     ncr_no_like_cond = request.POST.get('ncr_no_like_cond', None)
     progress = request.POST.get('progress', None)
     dept_id = request.POST.get('dept', None)
-
-
     search = request.POST.get('search', None)
-    print("search >>" + str(search))
-
     page = request.POST.get('page', None)
-    print("page >>" + str(page))
 
     #selected_dept = request.GET.get('dept') 
     #selected_dept = request.POST.get('selected_dept', None)
@@ -905,6 +922,39 @@ def ncr_search_view(request):
         # Added for additional request 
         #WHEN n.status = '7' THEN 'Cancel Request'
         
+        #sqlStmt = """SELECT ncr_no, 
+        #                 CASE WHEN n.classification = '1' THEN  'Minor' 
+        #                     WHEN n.classification = '2' THEN  'Major' 
+        #                 End as classification,
+        #                 n.nc_detail_description as nc_detail_description, 
+        #                 d.name as dept_id, 
+        #                 p.name as project_id, 
+        #                 e1.chapaNo as ic_incharge, 
+        #                 CONCAT(e1.lastName, ', ', e1.firstName, ' ', e1.middleName) as ic_incharge_name, 
+        #                 CASE WHEN coalesce(n.nc_detail_description, '') != '' AND coalesce(n.ic_description, '') = '' THEN 'A. Nonconformance detail description' 
+        #                     WHEN coalesce(n.ic_description, '') != '' AND coalesce(n.rca_description, '') = '' THEN 'B. Immediate Correction' 
+        #                     WHEN coalesce(n.rca_description, '') != '' AND coalesce(n.ca_description, '') = '' THEN 'C. Root Cause Analysis' 
+        #                     WHEN coalesce(n.ca_description, '') != ''  AND coalesce(n.ra_description, '') = '' THEN 'D. Corrective Action to the cause' 
+        #                     WHEN coalesce(n.ra_description, '') != '' AND coalesce(n.se_description, '') = '' THEN 'E. Result of action' 
+        #                     WHEN coalesce(n.se_description, '') != '' THEN 'F. Show Effectiveness'           
+        #                 END as progress,
+        #                 n.update_user_id as update_user_id,
+        #                 CASE WHEN n.status = '1' THEN 'Issued' 
+        #                     WHEN n.status = '2' THEN 'Cancelled' 
+        #                     WHEN n.status = '3' THEN 'Accepted' 
+        #                     WHEN n.status = '4' THEN 'On-going' 
+        #                     WHEN n.status = '5' THEN 'Closed' 
+        #                     WHEN n.status = '7' THEN 'Cancel Request'
+        #                     ELSE '' 
+        #                 End as status,
+        #                 n.ncr_issue_by,
+        #                 n.nc_conforme_status
+        #             FROM NCR_DETAIL_MSTR n
+        #                 LEFT JOIN DEPT d ON (trim(n.dept_id) =  trim(d.id))
+        #                 LEFT JOIN PROJECT p ON (n.project_id =  p.id AND trim(n.dept_id = p.dept_id))
+        #                 LEFT JOIN EMPLOYEE e1 ON (n.ic_incharge =  e1.chapaNo)                         
+        #             WHERE n.delete_date IS NULL"""   
+        
         sqlStmt = """SELECT ncr_no, 
                          CASE WHEN n.classification = '1' THEN  'Minor' 
                              WHEN n.classification = '2' THEN  'Major' 
@@ -922,21 +972,45 @@ def ncr_search_view(request):
                              WHEN coalesce(n.se_description, '') != '' THEN 'F. Show Effectiveness'           
                          END as progress,
                          n.update_user_id as update_user_id,
-                         CASE WHEN n.status = '1' THEN 'Issued' 
+                         CASE WHEN n.ra_action_effective = '2' THEN 'For Follow-up'
+                             WHEN n.status = '1' THEN 'Issued' 
                              WHEN n.status = '2' THEN 'Cancelled' 
                              WHEN n.status = '3' THEN 'Accepted' 
                              WHEN n.status = '4' THEN 'On-going' 
                              WHEN n.status = '5' THEN 'Closed' 
                              WHEN n.status = '7' THEN 'Cancel Request'
+                             WHEN n.status = '8' THEN 'For Follow-up'
                              ELSE '' 
                          End as status,
-                         n.ncr_issue_by,
-                         n.nc_conforme_status
+                         coalesce(n.ncr_issue_by, '') as ncr_issue_by,
+                         coalesce(n.nc_conforme_status, '') as nc_conforme_status,
+                         coalesce(n.ic_approve_status, '') as ic_approve_status,
+                         coalesce(n.rca_incharge, '') as rca_incharge,
+                         coalesce(n.rca_approve_status, '') as rca_approve_status,
+                         coalesce(n.ra_check_by_staff, '') as ra_check_by_staff,
+                         coalesce(n.ra_check_by_sh_status, '') as ra_check_by_sh_status,
+                         coalesce(n.ca_approve_by_mgr_status, '') as ca_approve_by_mgr_status,
+                         CASE
+                            WHEN coalesce(n.close_date, '') != '' THEN 'CLOSE' 
+                            WHEN coalesce(n.nc_conforme_status, '') = '' THEN n.nc_conformed_by
+                            WHEN coalesce(n.nc_conforme_status, '') = '0' THEN n.ncr_issue_by
+                            WHEN coalesce(n.nc_conforme_status, '') = '1' and (coalesce(n.ic_approve_status, '') = '0' or coalesce(n.ic_create_date, '') = '') THEN n.ic_incharge
+                            WHEN coalesce(n.ic_create_date, '') != '' and coalesce(n.ic_approve_status, '') = '' THEN n.ic_approve_by
+                            WHEN coalesce(n.ic_approve_status, '') = '1' and (coalesce(n.rca_create_date, '') = '' or coalesce(n.rca_approve_status, '') = '0' or coalesce(n.ca_check_by_sh_status, '') = '0' or coalesce(n.ca_approve_by_mgr_status, '') = '0') THEN coalesce(n.rca_incharge, n.ic_incharge)
+                            WHEN coalesce(n.rca_create_date, '') != '' and coalesce(n.rca_approve_status, '') = '' THEN 'n.rca_approve_by'
+                            WHEN coalesce(n.rca_approve_status, '') = '1' and coalesce(n.ca_check_by_sh_status, '') = '' THEN 'n.ca_checked_by_sh'
+	                        WHEN coalesce(n.ca_check_by_sh_status, '') = '1' and coalesce(n.ca_approve_by_mgr_status, '') = '' THEN n.ca_approved_by_mgr
+                            WHEN coalesce(n.ca_approve_by_mgr_status, '') = '1' and (coalesce(n.ra_check_date_by_staff, '') = '' or coalesce(n.ra_check_by_sh_status, '') = '0' or coalesce(n.se_check_by_mgr_status, '') = '0' or coalesce(n.se_check_by_qa_status, '') = '0' or coalesce(n.ra_action_effective, '') = '2' ) THEN coalesce(n.ra_check_by_staff, n.rca_incharge)
+                            WHEN coalesce(n.ra_check_date_by_staff, '') != '' and coalesce(n.ra_check_by_sh_status, '') = '' THEN n.ra_check_by_sh
+                            WHEN coalesce(n.ra_check_by_sh_status, '') = '1' and coalesce(n.se_check_by_mgr_status, '') = ''  THEN n.se_check_by_mgr
+                            WHEN coalesce(n.se_check_by_mgr_status, '') = '1' and coalesce(n.se_check_by_qa_status, '') = ''  THEN n.se_check_by_qa
+                            ELSE ''
+                        END as current_in_charge
                      FROM NCR_DETAIL_MSTR n
                          LEFT JOIN DEPT d ON (trim(n.dept_id) =  trim(d.id))
                          LEFT JOIN PROJECT p ON (n.project_id =  p.id AND trim(n.dept_id = p.dept_id))
                          LEFT JOIN EMPLOYEE e1 ON (n.ic_incharge =  e1.chapaNo)                         
-                     WHERE n.delete_date IS NULL"""   
+                     WHERE n.ncr_no IS NOT NULL"""   
                      
         #check if ncr_no is null or blank    
         if not ncr_no in [None, '']:    
@@ -953,10 +1027,6 @@ def ncr_search_view(request):
             
         #if not selected_dept in [None, '']:        
         #    sqlStmt = sqlStmt + " AND TRIM(n.dept_id) = TRIM('" + selected_dept + "')"     
-            
-            
-       
-            
                 
         #if project_id:
         if not project_id in [None, '']:            
@@ -976,14 +1046,10 @@ def ncr_search_view(request):
         if not status in [None, '']:
             if status == '6':
                 sqlStmt = sqlStmt + " AND ((n.close_date is null and DATE_FORMAT(sysdate(), '%Y%m%d') > DATE_FORMAT(n.deadline, '%Y%m%d')) or (n.close_date is not null and DATE_FORMAT(n.close_date, '%Y%m%d') > DATE_FORMAT(n.deadline, '%Y%m%d')))"
+            elif status == '8':
+                sqlStmt = sqlStmt + " AND n.ra_action_effective = '2'"
             else:    
                 sqlStmt = sqlStmt + " AND n.status = '" + status + "'" 
-        
-
-       
-        
-       
-        
 
         # Iterate over the classification list
         if len(classification_list) > 0:
@@ -1027,9 +1093,14 @@ def ncr_search_view(request):
                                 
         sqlStmt = sqlStmt + " ORDER BY n.ncr_issue_date DESC"    
         
-        sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
+        #sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
+        #sqlStmtX = sqlStmtX + sqlStmt
+        #sqlStmtX = sqlStmtX + ") a;"  
+        sqlStmtX = "SELECT a.*, @rownum:=(@rownum+1) AS row_num, "
+        sqlStmtX = sqlStmtX + "CASE WHEN a.current_in_charge = 'CLOSE' THEN '★' ELSE CONCAT(e2.lastName, ', ', e2.firstName, ' ', e2.middleName) END as current_incharge_name from ("
         sqlStmtX = sqlStmtX + sqlStmt
-        sqlStmtX = sqlStmtX + ") a;"        
+        sqlStmtX = sqlStmtX + ") a LEFT JOIN EMPLOYEE e2 ON (a.current_in_charge = e2.chapaNo);"
+      
                 
         try:
             cursor=connection.cursor()
@@ -1046,14 +1117,8 @@ def ncr_search_view(request):
             
         paginator = Paginator(ncr_stat_view_list, MAX_ROWS_PER_PAGE) # Show rows per page.
         page_number = request.GET.get('page')    
-        
-        print("page_number >>" + str(page_number))
-        
         page_number = page    
-        
-        print("page_number >>" + str(page_number))
-        
-            
+ 
         try:
             page_obj = paginator.get_page(page_number)
         except PageNotAnInteger:
@@ -1110,11 +1175,6 @@ def ncr_search_view(request):
 #NCOA01_01
 def ncr_create_view_ins(request):
     print('START : ncr_create_view_ins')
-
-
-
-
-
 
     form = None
     error_message = ''
@@ -1279,15 +1339,10 @@ def ncr_create_view_upd(request, ncr_no, status):
             
         if "isAdmin" in request.session:    
             isAdmin = request.session["isAdmin"]    
-            
-
-    
-            
+                  
         try:
             n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)            
-            print(n.ncr_no)
 
-            
             #Added Edric Marinas 2024/05/08 
             email = 'None'
             name = n.nc_discovered_by.split(',')
@@ -1300,7 +1355,6 @@ def ncr_create_view_upd(request, ncr_no, status):
                 if employee == 1:
                     employee = Employee.objects.get(lastname=lastname)
                     email = employee.email
-                    print(email)
                 elif employee > 1:
                     #name = name.split(' ')
                     #firstname = name[1]
@@ -1522,9 +1576,23 @@ def ncr_create_view_upd(request, ncr_no, status):
             
             
             #2024/05/08
+            nowx = datetime.datetime.now()
+            date_time = nowx.strftime("%Y-%m-%d")
+            print("date and time:", date_time)
 
 
+            ca_target_date_yyyymmdd = n.ca_target_date
+            if n.ca_target_date not in [None, '']:
+                ca_target_date_yyyymmd = n.ca_target_date.strftime("%Y-%m-%d")
+                ca_target_date_yyyymmdd = str(ca_target_date_yyyymmdd)
+                ca_target_date_yyyymmdd = ca_target_date_yyyymmdd[0: 12]
 
+            ra_followup_date_yyyymmdd = n.ra_followup_date
+            
+            if ra_followup_date_yyyymmdd not in [None, '']:
+                ra_followup_date_yyyymmd = ra_followup_date_yyyymmdd.strftime('%Y-%m-%d')
+                ra_followup_date_yyyymmdd = str(ra_followup_date_yyyymmdd)
+                ra_followup_date_yyyymmdd = ra_followup_date_yyyymmd[0: 12]
 
             #initialize form 
             form = NCRCreateForm(initial={                
@@ -1561,7 +1629,10 @@ def ncr_create_view_upd(request, ncr_no, status):
                     'rca_create_date' : rca_create_date, 
                     'rca_approve_by' : rca_approve_by, 
                     'rca_approve_date' : rca_approve_date, 
-                    'ca_target_date' : n.ca_target_date, 
+
+                    #'ca_target_date' : n.ca_target_date, 
+                    'ca_target_date' : ca_target_date_yyyymmdd,
+                    
                     'ca_description' : n.ca_description, 
                     'ca_create_by' : n.ca_create_by, 
                     'ca_create_date' : ca_create_date, 
@@ -1571,7 +1642,10 @@ def ncr_create_view_upd(request, ncr_no, status):
                     'ca_approved_date_by_mgr' : ca_approved_date_by_mgr, 
                     'ra_description' : n.ra_description, 
                     'ra_action_effective' : n.ra_action_effective, 
-                    'ra_followup_date' : n.ra_followup_date,
+                    
+                    #'ra_followup_date' : n.ra_followup_date,
+                    'ra_followup_date' : ra_followup_date_yyyymmdd,
+
                     'ra_check_by_staff' : ra_check_by_staff,  
                     'ra_check_date_by_staff' : ra_check_date_by_staff, 
                     'ra_check_by_sh' : ra_check_by_sh, 
@@ -1612,8 +1686,6 @@ def ncr_create_view_upd(request, ncr_no, status):
                     'is_E_on_edit_mode' : 'X',
                     'is_F_on_edit_mode' : 'X',
                     'ra_check_by_staff_name' : ra_check_by_staff_name,
-                    
-                    
                     
                     })                     
             set_dropdowns(form, n.dept.id)
@@ -1764,6 +1836,21 @@ def ncr_verify_list_view(request):
     
   
     #Set SQL statement
+    #sqlStmt = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
+    #sqlStmt = sqlStmt + "SELECT n.ncr_no as ncr_no, n.nc_detail_description, n.deadline, CONCAT(e.lastName, ', ', e.firstName, ' ', e.middleName) as last_update_by_name, n.update_date "
+    #sqlStmt = sqlStmt + "FROM ncr_detail_mstr n LEFT JOIN EMPLOYEE e ON (n.update_user_id =  e.chapaNo) "
+    #sqlStmt = sqlStmt + "WHERE n.delete_date IS NULL AND n.se_check_date_by_qa IS NULL AND ("
+    #sqlStmt = sqlStmt + "(n.nc_conformed_by = '" + logged_user_chapa_no + "' and (n.nc_conformed_date IS NULL OR n.status = '7') ) OR "
+    #sqlStmt = sqlStmt + "(n.ic_approve_by = '" + logged_user_chapa_no + "' and (n.ic_approve_date IS NULL OR n.status = '7') ) OR "
+    #sqlStmt = sqlStmt + "(n.rca_approve_by = '" + logged_user_chapa_no + "' and (n.rca_approve_date IS NULL OR n.status = '7') ) OR "
+    #sqlStmt = sqlStmt + "(n.ca_checked_by_sh = '" + logged_user_chapa_no + "' and (n.ca_check_date_by_sh IS NULL OR n.status = '7') ) OR "           
+    #sqlStmt = sqlStmt + "(n.ca_approved_by_mgr = '" + logged_user_chapa_no + "' and (n.ca_approved_date_by_mgr IS NULL OR n.status = '7') ) OR "
+    #sqlStmt = sqlStmt + "(n.ra_check_by_sh = '" + logged_user_chapa_no + "' and (n.ra_check_date_by_sh IS NULL OR n.status = '7') ) OR "                 
+    #sqlStmt = sqlStmt + "(n.se_check_by_mgr = '" + logged_user_chapa_no + "' and (n.se_check_date_by_mgr IS NULL OR n.status = '7') ) OR "
+    #sqlStmt = sqlStmt + "(n.se_check_by_qa = '" + logged_user_chapa_no + "' and (n.se_check_date_by_qa IS NULL OR n.status = '7') ) )"
+    #sqlStmt = sqlStmt + "AND n.status not in ('5','2')"
+    #END MODIFYING FOR IMPROVEMENT Edric 2024/04/26
+
     sqlStmt = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
     sqlStmt = sqlStmt + "SELECT n.ncr_no as ncr_no, n.nc_detail_description, n.deadline, CONCAT(e.lastName, ', ', e.firstName, ' ', e.middleName) as last_update_by_name, n.update_date "
     sqlStmt = sqlStmt + "FROM ncr_detail_mstr n LEFT JOIN EMPLOYEE e ON (n.update_user_id =  e.chapaNo) "
@@ -1771,13 +1858,12 @@ def ncr_verify_list_view(request):
     sqlStmt = sqlStmt + "(n.nc_conformed_by = '" + logged_user_chapa_no + "' and (n.nc_conformed_date IS NULL OR n.status = '7') ) OR "
     sqlStmt = sqlStmt + "(n.ic_approve_by = '" + logged_user_chapa_no + "' and (n.ic_approve_date IS NULL OR n.status = '7') ) OR "
     sqlStmt = sqlStmt + "(n.rca_approve_by = '" + logged_user_chapa_no + "' and (n.rca_approve_date IS NULL OR n.status = '7') ) OR "
-    sqlStmt = sqlStmt + "(n.ca_checked_by_sh = '" + logged_user_chapa_no + "' and (n.ca_check_date_by_sh IS NULL OR n.status = '7') ) OR "           
-    sqlStmt = sqlStmt + "(n.ca_approved_by_mgr = '" + logged_user_chapa_no + "' and (n.ca_approved_date_by_mgr IS NULL OR n.status = '7') ) OR "
+    sqlStmt = sqlStmt + "(n.ca_checked_by_sh = '" + logged_user_chapa_no + "' and n.rca_approve_status = '1'  and (n.ca_check_date_by_sh IS NULL OR n.status = '7') ) OR "           
+    sqlStmt = sqlStmt + "(n.ca_approved_by_mgr = '" + logged_user_chapa_no + "' and n.ca_check_by_sh_status = '1' and (n.ca_approved_date_by_mgr IS NULL OR n.status = '7') ) OR "
     sqlStmt = sqlStmt + "(n.ra_check_by_sh = '" + logged_user_chapa_no + "' and (n.ra_check_date_by_sh IS NULL OR n.status = '7') ) OR "                 
-    sqlStmt = sqlStmt + "(n.se_check_by_mgr = '" + logged_user_chapa_no + "' and (n.se_check_date_by_mgr IS NULL OR n.status = '7') ) OR "
-    sqlStmt = sqlStmt + "(n.se_check_by_qa = '" + logged_user_chapa_no + "' and (n.se_check_date_by_qa IS NULL OR n.status = '7') ) )"
-    sqlStmt = sqlStmt + "AND n.status not in ('5','2')"
-    #END MODIFYING FOR IMPROVEMENT Edric 2024/04/26
+    sqlStmt = sqlStmt + "(n.se_check_by_mgr = '" + logged_user_chapa_no + "' and n.ra_check_by_sh_status = '1' and (n.se_check_date_by_mgr IS NULL OR n.status = '7') ) OR "
+    sqlStmt = sqlStmt + "(n.se_check_by_qa = '" + logged_user_chapa_no + "' and n.se_check_by_mgr_status = '1' and (n.se_check_date_by_qa IS NULL OR n.status = '7') ) )"
+    sqlStmt = sqlStmt + "AND n.status not in ('5','2')" 
 
     #sqlStmt = sqlStmt + " ORDER BY n.ncr_issue_date DESC"   
     sqlStmt = sqlStmt + " ORDER BY n.update_date DESC"   
@@ -2327,8 +2413,14 @@ def is_error_on_required_F(request, form):
     if se_description == '':
         has_error = True
         form.fields['se_description'].widget.attrs['class'] = "form-control error"
+
+    se_ro_updated = form.data.get('se_ro_updated') 
+
+    if se_ro_updated == '':
+        has_error = True
+        form.fields['se_ro_updated'].widget.attrs['class'] = "form-control error"    
         
-    se_ro_updated = form.data.getlist('se_ro_updated')
+   #se_ro_updated = form.data.getlist('se_ro_updated')
 
 
     
@@ -2500,11 +2592,6 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
     
         try:
             n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)    
-            
-            
-
-
-      
         
             try:
                 a = DenyReason.objects.get(ncr_no=ncr_no,phase='G')
@@ -2517,13 +2604,11 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
             
             form = NCRVerifyForm(initial={
                 
-                
                     #Start adding for additional Request Edric 2024/03/14
                     'hidden_update_user_id' : n.update_user_id,
                     'current_datetime': current_datetime,
                     #End adding for additional Request Edric 2024/03/14
-                
-                
+                   
                     'source' : n.source, 
                     'other_source' : n.other_source, 
                     'classification' : n.classification,  
@@ -2630,13 +2715,6 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
         ncr_no_size = 'S'
         if len(n.ncr_no) > 25:     
             ncr_no_size = 'L'
-            
-            
-            
-        
-        
-        
-        
         
         context = {
                    #2024/05/08
@@ -4375,14 +4453,13 @@ def ncr_create(request):
                     n = ncr_create_insert(request, form, logged_user_chapa_no)  
                     ncr_no = n.ncr_no
 
-                    
-                    if S_or_SN == 'SN':
-                            print(S_or_SN)
-                            ##sendmail_create('A', n)
+                    # Start Modify JTR 2024.12,20
+                    #if S_or_SN == 'SN':
+                    if S_or_SN == 'SN' and n.ra_action_effective != '2':
+                    # End Modify JTR 2024.12,20        
                             sendmail_create('A', n, logged_user_chapa_no)
                             message = request.session["Message"] = "NCR data was succesfully inserted in database and email notification was sent."
                             error_message = ""
-                            
                             
                     elif S_or_SN == 'S':
                         message = request.session["Message"] = "NCR data was succesfully inserted in database."
@@ -4475,8 +4552,6 @@ def ncr_create_insert(request, form, login_user_chapa_no):
     consumed_mh1 = form.cleaned_data['consumed_mh1']
     #END: Add CJ.Avila
 
-    print("consumed_mh1>>>>>>>>>>>>" + str(nc_detail_description))
-
     ic_incharge = form.cleaned_data['ic_incharge']
 
     #2024/05/08
@@ -4559,7 +4634,6 @@ def ncr_create_insert(request, form, login_user_chapa_no):
     n.classification = classification
     n.nc_detail_description = nc_detail_description
     #START: Add CJ.Avila
-    
     n.consumed_mh1 = consumed_mh1
     #END: Add CJ.Avila
     n.ncr_issue_by = login_user_chapa_no
@@ -4622,6 +4696,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     ra_check_by_sh = form.cleaned_data['ra_check_by_sh']
     se_check_by_mgr = form.cleaned_data['se_check_by_mgr']
     ic_incharge = form.cleaned_data['ic_incharge']
+    consumed_mh1 = form.cleaned_data['consumed_mh1']
     #START Add CJ.AVILA
     consumed_mh2 = form.cleaned_data['consumed_mh2']
     consumed_mh3 = form.cleaned_data['consumed_mh3']
@@ -4696,6 +4771,10 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         nc_conformed_by_chapano = ''
         if nc_conformed_by not in ('', None):
             nc_conformed_by_chapano = nc_conformed_by.chapano   
+
+        n_consumed_mh1 = ''
+        if (n.consumed_mh1 not in ('', None)):
+            n_consumed_mh1= n.consumed_mh1     
     
         #B. Immediate Correction     
         n_ic_description = ''    
@@ -4825,7 +4904,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         if hidden_request_cancel != '7':
         
             #A. Nonconformance detail description
-            if (n_source != source or n.other_source != n_other_source or n_classification != classification or n_nc_detail_description != nc_detail_description or n_nc_discovered_by != nc_discovered_by or n_nc_conformed_by != nc_conformed_by.chapano or n_ic_incharge != ic_incharge_chapano) and ic_description in ('', None):        
+            if (n_source != source or n.other_source != n_other_source or n_classification != classification or n_nc_detail_description != nc_detail_description or n_nc_discovered_by != nc_discovered_by or n_nc_conformed_by != nc_conformed_by.chapano or n_ic_incharge != ic_incharge_chapano or consumed_mh1 != n_consumed_mh1) and ic_description in ('', None):        
                 has_change_A = True  
     
                 n.source = source
@@ -4854,6 +4933,8 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                 if edit_cause != '0':
                     n.nc_conformed_date = None
                     n.nc_conforme_status = None
+
+                n.consumed_mh1 = consumed_mh1    
     
             #B. Immediate Correction
             if (n_ic_description != ic_description or n_ic_approve_by != ic_approve_by_chapano or convertNoneToNull(n_consumed_mh2) != convertNoneToNull(consumed_mh2)) and ic_description not in ('', None):             
@@ -5042,16 +5123,16 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                     sendmail_create('D', n, login_user_chapa_no)
 
                 elif n.classification == '2' and n.se_description not in ('', None):  
-                    if has_change_E and has_change_F:
+                    if has_change_E and has_change_F and n.ra_action_effective != '2':
                         sendmail_create('E-proceedToF', n, login_user_chapa_no)
 
-                    elif has_change_E:
+                    elif has_change_E and n.ra_action_effective != '2':
                         sendmail_create('E', n, login_user_chapa_no)
 
-                    elif has_change_F:    
+                    elif has_change_F and n.ra_action_effective != '2':    
                         sendmail_create('F', n, login_user_chapa_no)
 
-                    elif classification == '1' and ra_description not in ('', None):
+                    elif classification == '1' and ra_description not in ('', None) and n.ra_action_effective != '2':
                         sendmail_create('E', n, login_user_chapa_no)
                       
                         
@@ -5064,15 +5145,15 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                             sendmail_create('E', n, login_user_chapa_no)
 
                             
-                        elif has_desc_F:
+                        elif has_desc_F and n.ra_action_effective != '2':
                             sendmail_create('F', n, login_user_chapa_no)
 
                             
-                        elif has_desc_E:
+                        elif has_desc_E and n.ra_action_effective != '2':
                             sendmail_create('E', n, login_user_chapa_no)
 
                             
-                        elif has_desc_E and has_desc_F:
+                        elif has_desc_E and has_desc_F and n.ra_action_effective != '2':
                             sendmail_create('E-proceedToF', n, login_user_chapa_no)
                         
                     elif has_desc_D:
@@ -5090,9 +5171,6 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                     elif has_desc_A:
                         sendmail_create('A', n, login_user_chapa_no)
                     
-                    else:
-                        print(">>>>>>>>>>ERROR")
-            
             #Cancel request 2024/04/04
             elif hidden_request_cancel == '7':
                 request.session["Message"] = ''
@@ -5124,7 +5202,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                 n.save()
                 request.session["Message"] = "NCR data was succesfully updated in database" 
             else:
-                request.session["Message"] = "No change was made"         
+                request.session["Message"] = "Database was mot updated nor Email notification was sent because there was no change in inputs"         
             #End adding for additional request Edric 2024/03/06
             
                     

@@ -253,6 +253,7 @@
           <th scope="col">Section</th>
           <th scope="col">Project</th>
           <th scope="col">In-charge</th>
+          <th scope="col">Current In-charge</th>
           <th scope="col">Status</th>
         </tr>
               
@@ -260,21 +261,44 @@
         <tr>
             <th >{{ ncrdetailmstr.row_num }}</th> 
             <td >
-              {% if ncrdetailmstr.ic_incharge == logged_user_chapa_no and ncrdetailmstr.nc_conforme_status == '1' %}
-                  <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
-              {% elif ncrdetailmstr.ncr_issue_by == logged_user_chapa_no and ncrdetailmstr.nc_conforme_status != '1' %}
+              <!--
+              {% if ncrdetailmstr.ncr_issue_by == logged_user_chapa_no and ncrdetailmstr.nc_conforme_status != '1' %}
                   <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>
-              {% elif ncrdetailmstr.rca_incharge == logged_user_chapa_no and ncrdetailmstr.ic_approve_status == '1' %}
+              {% elif ncrdetailmstr.ic_incharge == logged_user_chapa_no and ncrdetailmstr.ic_approve_status != '1' %}
                   <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
-              {% elif ncrdetailmstr.ra_check_by_staff == logged_user_chapa_no and ncrdetailmstr.ca_approve_by_mgr_status == '1' %}
-                  <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>         
+              {% elif ncrdetailmstr.rca_incharge == logged_user_chapa_no and ncrdetailmstr.rca_approve_status != '1' %}
+                  <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
+              {% elif ncrdetailmstr.ra_check_by_staff == logged_user_chapa_no and ncrdetailmstr.ra_check_by_sh_status != '1' %}
+                  <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
+              {% elif ncrdetailmstr.ic_incharge == logged_user_chapa_no and ncrdetailmstr.ic_approve_status == '1' and ncrdetailmstr.rca_incharge == '' %}
+                  < href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
+              {% elif ncrdetailmstr.rca_incharge == logged_user_chapa_no and ncrdetailmstr.ca_approve_by_mgr_status == '1' and ncrdetailmstr.ra_check_by_staff == '' %}
+                  <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
               {% else %}
+              
                   {% if isChecker or isSH or isGrpMgr or isQA %}
-                    <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/1/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>   
-                  {% else %}   
-                    <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/0/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>  
+                    L2<a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/1/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>   
+                  {% else %} 
+                    L3<a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/0/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>  
                   {% endif %}   
-              {% endif %}               
+              {% endif %}
+            -->
+            
+            {% if ncrdetailmstr.current_in_charge != logged_user_chapa_no and ncrdetailmstr.ncr_issue_by == logged_user_chapa_no and ncrdetailmstr.nc_conforme_status == '' %}
+              <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
+            {% elif ncrdetailmstr.current_in_charge != logged_user_chapa_no and ncrdetailmstr.ic_incharge == logged_user_chapa_no and ncrdetailmstr.ic_approve_status == '' %}
+              <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
+            {% elif isChecker or isSH or isGrpMgr or isQA %}
+              <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/1/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>   
+            {% elif ncrdetailmstr.current_in_charge == logged_user_chapa_no %}
+              <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>                        
+            {% elif ncrdetailmstr.rca_incharge == logged_user_chapa_no and ncrdetailmstr.rca_approve_status == '' and ncrdetailmstr.ic_approve_status == '1' %}
+              <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
+            {% elif ncrdetailmstr.ra_check_by_staff == logged_user_chapa_no and ncrdetailmstr.ra_check_by_sh_status == '' and ncrdetailmstr.ca_approve_by_mgr_status == '1' %}
+              <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
+            {% else %} 
+              <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/0/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>  
+            {% endif %}   
             </td>
             <td class="col-3">{{ncrdetailmstr.nc_detail_description}}</td>
             <td >{{ ncrdetailmstr.progress }}</td>
@@ -282,6 +306,7 @@
             <td >{{ ncrdetailmstr.dept_id }}</td>
             <td >{{ ncrdetailmstr.project_id }}</td>   
             <td >{{ ncrdetailmstr.ic_incharge_name }}</th>
+            <td >{{ ncrdetailmstr.current_incharge_name }}</th>  
             <td >{{ ncrdetailmstr.status }}</td>                     
         </tr>  
     {% endfor %}

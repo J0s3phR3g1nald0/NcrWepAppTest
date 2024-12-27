@@ -69,13 +69,11 @@ STATUS = [
     ('4', 'On-going'),    
     ('5', 'Closed'),    
     ('6', 'Delayed'),    
-    
-    
     #Start modifying for additional request Edric Marinas 2024/04/04 
     ('7', 'Cancel Request'), 
     #End modifying for additional request Edric Marinas 2024/04/04
+    ('8', 'For Follow-up'), 
 ]
-
 
 ADVANCE_USERS = [    
     ('', '---------'),
@@ -254,7 +252,7 @@ class NCRCreateForm(forms.Form):
         label='Action Effective : ', 
         choices=ACTION_EFFECTIVE_CHOICES)
     ra_followup_date = forms.DateField(
-        widget=forms.TextInput(attrs={'class': 'form-control', 'id':'ra_followup_date'}),
+        widget=forms.TextInput(attrs={'class': 'form-control', 'id':'ra_followup_date', 'readonly':'readonly',}),
         required=False,
         label='Date: ')
     ra_check_by_staff = forms.ModelChoiceField(

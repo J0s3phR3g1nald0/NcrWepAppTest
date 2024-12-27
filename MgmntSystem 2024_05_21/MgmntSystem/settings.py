@@ -90,13 +90,25 @@ WSGI_APPLICATION = 'MgmntSystem.wsgi.application'
 #}
 
 #overtime system test DB
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'ot',
+#        'USER': 'otuser02',
+#        'PASSWORD': 'otuser02',
+#        'HOST': '10.2.1.18',
+#        'PORT': '3306'
+#    }
+#}
+
+#production DB
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ot',
-        'USER': 'otuser02',
-        'PASSWORD': 'otuser02',
-        'HOST': '10.2.1.18',
+        'USER': 'sdmi',
+        'PASSWORD': 'sdmi',
+        'HOST': '10.2.1.147',
         'PORT': '3306'
     }
 }
