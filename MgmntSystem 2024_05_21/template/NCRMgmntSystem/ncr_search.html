@@ -283,19 +283,18 @@
                   {% endif %}   
               {% endif %}
             -->
-            
             {% if ncrdetailmstr.current_in_charge != logged_user_chapa_no and ncrdetailmstr.ncr_issue_by == logged_user_chapa_no and ncrdetailmstr.nc_conforme_status == '' %}
               <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
             {% elif ncrdetailmstr.current_in_charge != logged_user_chapa_no and ncrdetailmstr.ic_incharge == logged_user_chapa_no and ncrdetailmstr.ic_approve_status == '' %}
               <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
-            {% elif isChecker or isSH or isGrpMgr or isQA %}
-              <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/1/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>   
             {% elif ncrdetailmstr.current_in_charge == logged_user_chapa_no %}
               <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>                        
             {% elif ncrdetailmstr.rca_incharge == logged_user_chapa_no and ncrdetailmstr.rca_approve_status == '' and ncrdetailmstr.ic_approve_status == '1' %}
               <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a>           
             {% elif ncrdetailmstr.ra_check_by_staff == logged_user_chapa_no and ncrdetailmstr.ra_check_by_sh_status == '' and ncrdetailmstr.ca_approve_by_mgr_status == '1' %}
               <a href="/ncr/ncr_create_view_upd/{{ ncrdetailmstr.ncr_no }}/0">{{ncrdetailmstr.ncr_no }}</a> 
+            {% elif isChecker or isSH or isGrpMgr or isQA %}
+              <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/1/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>   
             {% else %} 
               <a href="/ncr/ncr_verify_view/{{ncrdetailmstr.ncr_no}}/0/None/None/{{logged_user_chapa_no}}">{{ncrdetailmstr.ncr_no}}</a>  
             {% endif %}   
