@@ -25,12 +25,11 @@ SECRET_KEY = 'ewg^zfi*7k=4(s7hhqko2z%ohu$o9*3ha89#se_=8)yb^w(&4s'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#ALLOWED_HOSTS = ['127.0.0.1', '10.2.12.92', 'localhost', 'ncr.sdmi.shi.co.jp', 'ncrwepapptest.sdmi.shi.co.jp']
-ALLOWED_HOSTS = ['ncrwepapptest.sdmi.shi.co.jp']
+ALLOWED_HOSTS = ['127.0.0.1', '10.2.12.92', 'localhost', 'ncr.sdmi.shi.co.jp']
+#ALLOWED_HOSTS = ['ncrwepapptest.sdmi.shi.co.jp']
 
 
 # Application definition
-
 
 
 INSTALLED_APPS = [
@@ -108,8 +107,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ot',
-        'USER': 'otuser02',
-        'PASSWORD': 'otuser02',
+        'USER': 'sdmi',
+        'PASSWORD': 'sdmi',
         'HOST': '10.2.1.166',
         'PORT': '3306'
     }

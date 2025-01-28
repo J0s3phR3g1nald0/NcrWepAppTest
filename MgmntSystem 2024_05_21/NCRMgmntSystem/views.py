@@ -4362,29 +4362,28 @@ def ncr_create(request):
                     #if S_or_SN == 'SN':
                     if S_or_SN == 'SN' and n.ra_action_effective != '2':
                     # End Modify JTR 2024.12,20        
-                            sendmail_create('A', n, logged_user_chapa_no)
-                            message = request.session["Message"] = "NCR data was succesfully inserted in database and email notification was sent."
-                            error_message = ""
-                            
+                        sendmail_create('A', n, logged_user_chapa_no)
+                        message = request.session["Message"] = "NCR data was succesfully inserted in database and email notification was sent."
+                        error_message = ""     
                     elif S_or_SN == 'S':
                         message = request.session["Message"] = "NCR data was succesfully inserted in database."
-                    
+                         
                 except DatabaseError: 
                     #db_update_success = False
                     error_message = 'Error occured while inserting new NCR data in database. (NCR#' + ncr_no +')'       
                    
-                except SMTPException:                                
+                except SMTPException:  
                     send_email_success = False
                     error_message = "There was an error sending an email."    
 
     #START: Add reginald-jsp 2025.01.24
-    if error_message in ('', None) and request.session['error_message'] not in ('', None):
+    if error_message in ('', None):
         try:
             error_message = request.session['error_message']
             request.session['error_message'] = ''
         except Exception :
             print('error_message not yet in session')
-        #END: Add reginald-jsp 2025.01.24
+    #END: Add reginald-jsp 2025.01.24
 
     if error_message not in ('', None) or is_form_valid == False:
 
