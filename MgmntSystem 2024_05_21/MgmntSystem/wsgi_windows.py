@@ -1,4 +1,5 @@
-activate_this = 'C:/Python36/Pyvenv/env/MgmntSystem/Scripts/activate_this.py'
+#activate_this = 'C:/Python36/Pyvenv/env/MgmntSystem/Scripts/activate_this.py'
+activate_this = 'C:/Python36/Pyvenv/envs/MgmntSystem/Scripts/activate_this.py'
 
 
 # execfile(activate_this, dict(__file__=activate_this))
@@ -9,7 +10,8 @@ import sys
 import site
 
 # Add the site-packages of the chosen virtualenv to work with
-site.addsitedir('C:/Python36/Pyvenv/env/MgmntSystem/Lib/site-packages')
+#site.addsitedir('C:/Python36/Pyvenv/env/MgmntSystem/Lib/site-packages')
+site.addsitedir('C:/Python36/Pyvenv/envs/MgmntSystem/Lib/site-packages')
 
 # Add the app's directory to the PYTHONPATH
 sys.path.append('C:/Python36/Pyvenv/projects/MgmntSystem')

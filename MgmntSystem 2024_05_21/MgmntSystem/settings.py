@@ -91,14 +91,26 @@ WSGI_APPLICATION = 'MgmntSystem.wsgi.application'
 #    }
 #}
 
-#overtime system test DB
+#DB for acceptance test
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'ot',
+#        'USER': 'otuser02',
+#        'PASSWORD': 'otuser02',
+#        'HOST': '10.2.1.18',
+#        'PORT': '3306'
+#    }
+#}
+
+#DB for acceptance test
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'ot',
         'USER': 'otuser02',
         'PASSWORD': 'otuser02',
-        'HOST': '10.2.1.18',
+        'HOST': '10.2.1.166',
         'PORT': '3306'
     }
 }
