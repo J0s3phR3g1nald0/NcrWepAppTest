@@ -24,15 +24,17 @@ MAX_ROWS_PER_PAGE = 10
 #PROJ_URL = 'http://127.0.0.1:8000/ncr/'
 #PROJ_URL = 'http://localhost:8080/ncr/'
 
+#For Test Server (Acceptance Test )
+PROJ_URL = 'http://ncrwepapptest.sdmi.shi.co.jp/ncr/'
+
 #For Integration Test Server (Development)
 #PROJ_URL = 'http://ncr.sdmi.shi.co.jp:82/ncr/'
 
 #For Real Server (Deployment)
-PROJ_URL = 'http://mgmntsystem.sdmi.shi.co.jp/ncr/'
+#PROJ_URL = 'http://mgmntsystem.sdmi.shi.co.jp/ncr/'
 
 #NCOA04_01
 #Logic for displaying log-in page
-
 def login_view(request):
     print('START: login_view')
 
@@ -42,6 +44,7 @@ def login_view(request):
 
     print('END: login_view')
     return render(request, 'NCRMgmntSystem/login.html', context)  
+
 #NCOA04_02
 #Save variables in session then displays the 'Create NCR' page if inputs are valid otherwise display error messages on log-in page
 def login(request):
@@ -118,9 +121,6 @@ def login(request):
                 request.session["isGrpMgr"] = isGrpMgr
                 request.session["isQA"] = isQA
                 request.session["isAdmin"] = isAdmin
-
-
-
 
                 if isChecker or isSH or isGrpMgr:    
                     print('END: login')
@@ -207,13 +207,13 @@ def login_via_email(request, mail_user_id):
         request.session["isQA"] = isQA
         request.session["isAdmin"] = isAdmin
 
-
-
     except Employee.DoesNotExist:
         pass
 
     print('END: login_via_email')
     return
+
+
 #NCOA04_03
 #Delete variables save in session then redisplay log-in page
 def logout(request):
@@ -1281,10 +1281,6 @@ def ncr_create_view_upd(request, ncr_no, status):
     ca_approved_by_mgr_name = ''
     se_check_by_mgr_name = ''
     se_check_by_qa_name = ''
-          
-
-
-
     
     deny_reasonA = ''
     deny_reasonB = ''
@@ -1317,9 +1313,6 @@ def ncr_create_view_upd(request, ncr_no, status):
         error_message = "Error"
 
     #End adding for additional request Edric Marinas 2024/04/04
-    
-
-    
     
     if "logged_user_chapa_no" in request.session:
         
@@ -1578,8 +1571,6 @@ def ncr_create_view_upd(request, ncr_no, status):
             #2024/05/08
             nowx = datetime.datetime.now()
             date_time = nowx.strftime("%Y-%m-%d")
-            print("date and time:", date_time)
-
 
             ca_target_date_yyyymmdd = n.ca_target_date
             if n.ca_target_date not in [None, '']:
@@ -1698,18 +1689,19 @@ def ncr_create_view_upd(request, ncr_no, status):
         context = {'form': form}  
         print('END: ncr_create_view_upd')
         return render(request, 'NCRMgmntSystem/login.html', context)  
-    
+
     if status == 'I':
-        message = 'NCR data was succesfully inserted in database.'
+        message = 'NCR data was succesfully inserted in database XXX.'
     elif status == 'U':
-        message = 'NCR data was succesfully updated in database.'
+        #message = 'NCR data was succesfully updated in database.'
+        message = request.session["Message"]
+    
     if status == 'IE':
         try:
             message = request.session["Message"]
             del request.session["Message"]
         except:
-            print("No message needed")
-            
+            print("No message needed")        
             #message = 'NCR data was succesfully inserted in database and email notification was sent.'
             
     elif status == 'UE':
@@ -1913,9 +1905,6 @@ def is_error_on_required(request, form):
     print('START: is_error_on_required')
      
     ca_necessary = form.data.get('ca_necessary')
-    
-    print('ca_necessary >>' + str(ca_necessary))
-    
     ca_description = form.data.get('ca_description')
     ca_target_date = form.data.get('ca_target_date')
     ca_checked_by_sh = form.data.get('ca_checked_by_sh')
@@ -1923,12 +1912,7 @@ def is_error_on_required(request, form):
     reason_action_not_effective = form.data.get('reason_action_not_effective')
     se_description = form.data.get('se_description')
     se_ro_updated = form.data.get('se_ro_updated')
-    
-    
     hidden_request_cancel = form.data.get('hidden_request_cancel')
-    
-    print(se_ro_updated)
-
     ncr_no = form.data.get('ncr_no') 
     
     d_has_input = False    
@@ -1941,9 +1925,6 @@ def is_error_on_required(request, form):
     has_errorD = False
     has_errorE = False
     has_errorF = False
-    
-    
-
     
     #D. Corrective Action to the cause
     if ca_description not in [None, ''] or ca_target_date not in [None, ''] or ca_checked_by_sh not in [None, ''] or ca_approved_by_mgr not in [None, '']:    
@@ -1989,14 +1970,10 @@ def is_error_on_required(request, form):
     elif has_errorA or has_errorB or has_errorC or has_errorD or has_errorE or has_errorF:     
         has_error = True
     
-    
-    
-        
-    
     print('END: is_error_on_required')
     return has_error
 
-
+# Method is_error_on_not_changed is unused
 def is_error_on_not_changed(request, form):
     print('START: is_error_on_not_changed')
     
@@ -2019,13 +1996,9 @@ def is_error_on_not_changed(request, form):
     ra_action_effective = form.cleaned_data['ra_action_effective']        
     ra_followup_date = form.cleaned_data['ra_followup_date']  
     se_description = form.cleaned_data['se_description']  
-    
     se_ro_updated = form.cleaned_data['se_ro_updated']  
-
-
     se_check_by_qa = form.cleaned_data['se_check_by_qa']  
     comments = form.cleaned_data['comments']  
-
     ic_incharge = form.cleaned_data['ic_incharge']        
     ic_approve_by = form.cleaned_data['ic_approve_by']   
     rca_incharge = form.cleaned_data['rca_incharge']        
@@ -2062,18 +2035,17 @@ def is_error_on_not_changed(request, form):
     nc_conformed_by_chapano = ''
     if nc_conformed_by not in ('', None):
         nc_conformed_by_chapano = nc_conformed_by.chapano
+    
     #B. Immediate Correction     
     n_ic_description = ''    
     if (n.ic_description not in ('', None)):
         n_ic_description = n.ic_description
-
     n_ic_incharge = ''    
     if (n.ic_incharge not in ('', None)):
         n_ic_incharge = n.ic_incharge  
     ic_incharge_chapano = ''
     if ic_incharge not in ('', None):
         ic_incharge_chapano = ic_incharge.chapano    
-
     n_ic_approve_by = ''    
     if (n.ic_approve_by not in ('', None)):
         n_ic_approve_by = n.ic_approve_by   
@@ -2117,7 +2089,6 @@ def is_error_on_not_changed(request, form):
     ca_approved_by_mgr_chapano = ''
     if ca_approved_by_mgr not in ('', None):
         ca_approved_by_mgr_chapano = ca_approved_by_mgr.chapano
-        
     n_ca_checked_by_sh = ''    
     if (n.ca_checked_by_sh not in ('', None)):
         n_ca_checked_by_sh = n.ca_checked_by_sh      
@@ -2138,7 +2109,6 @@ def is_error_on_not_changed(request, form):
     ra_followup_date_str = ''    
     if (ra_followup_date not in ('', None)):
         ra_followup_date_str = ra_followup_date      
-   
     n_ra_check_by_staff = ''    
     if (n.ra_check_by_staff not in ('', None)):
         n_ra_check_by_staff = n.ra_check_by_staff      
@@ -2159,14 +2129,12 @@ def is_error_on_not_changed(request, form):
     se_check_by_qa_chapano = ''
     if se_check_by_qa not in ('', None):
         se_check_by_qa_chapano = se_check_by_qa.chapano
-        
     n_ra_check_by_sh = ''    
     if (n.ra_check_by_sh not in ('', None)):
         n_ra_check_by_sh = n.ra_check_by_sh      
     ra_check_by_sh_chapano = ''
     if ra_check_by_sh not in ('', None):
         ra_check_by_sh_chapano = ra_check_by_sh.chapano 
-        
     n_se_check_by_mgr = ''    
     if (n.se_check_by_mgr not in ('', None)):
         n_se_check_by_mgr = n.se_check_by_mgr      
@@ -2181,27 +2149,28 @@ def is_error_on_not_changed(request, form):
     #B. Immediate Correction
     elif n_ic_description != ic_description or n_ic_incharge != ic_incharge_chapano or n_ic_approve_by != ic_approve_by_chapano:   
         was_not_changed = False
-        
+
     #C. Root Cause Analysis(5 Whys, Fishbone, etc)
     elif n_rca_description != rca_description or n_ca_necessary != ca_necessary or n_rca_incharge != rca_incharge_chapano or n_rca_approve_by != rca_approve_by_chapano:            
         was_not_changed = False
-        
+
     #D. Corrective Action to the cause
     elif n_ca_description != ca_description or n_ca_target_date != ca_target_date_str or n_ca_approved_by_mgr != ca_approved_by_mgr_chapano or n_ca_checked_by_sh != ca_checked_by_sh_chapano:            
         was_not_changed = False
         
     #E. Result of action           
-    if n_ra_description != ra_description or n_ra_action_effective != ra_action_effective or n_ra_followup_date != ra_followup_date_str or n_ra_check_by_staff != ra_check_by_staff_chapano:     
+    elif n_ra_description != ra_description or n_ra_action_effective != ra_action_effective or n_ra_followup_date != ra_followup_date_str or n_ra_check_by_staff != ra_check_by_staff_chapano:     
         was_not_changed = False
             
     #F. Show Effectiveness  
-    if n_se_description != se_description or n_se_ro_updated != se_ro_updated or n_ra_check_by_sh != ra_check_by_sh_chapano or n_se_check_by_mgr != se_check_by_mgr_chapano:            
+    #elif n_se_description != se_description or n_se_ro_updated != se_ro_updated[0] or n_ra_check_by_sh != ra_check_by_sh_chapano or n_se_check_by_mgr != se_check_by_mgr_chapano:            
+    elif n_se_description != se_description or n_se_ro_updated != se_ro_updated[0] or n_ra_check_by_sh != ra_check_by_sh_chapano or n_se_check_by_mgr != se_check_by_mgr_chapano:  
         was_not_changed = False
-    
+
     #if  se_check_by_qa_chapano != str(n.se_check_by_qa):    
     if se_check_by_qa_chapano != n_se_check_by_qa:        
         was_not_changed = False
-    
+        
     if comments != n.comments:        
         was_not_changed = False
     
@@ -2391,7 +2360,13 @@ def is_error_on_required_E(request, form):
         form.fields['se_check_by_qa'].widget.attrs['class'] = "form-control error"  
     
     ra_action_effective = form.data.get('ra_action_effective')
-    if ra_action_effective == '2': 
+    
+    #if ra_action_effective == '2':
+    if (ra_action_effective not in ('0', '1', '2')):
+        has_error = True
+        form.fields['ra_action_effective'].widget.attrs['class'] = "form-control radioErr"
+    
+    #elif ra_action_effective == '2':  
         ra_followup_date = form.data.get('ra_followup_date')
         if ra_followup_date == '': 
             has_error = True
@@ -2420,10 +2395,7 @@ def is_error_on_required_F(request, form):
         has_error = True
         form.fields['se_ro_updated'].widget.attrs['class'] = "form-control error"    
         
-   #se_ro_updated = form.data.getlist('se_ro_updated')
-
-
-    
+    #se_ro_updated = form.data.getlist('se_ro_updated')
 
     #Start adding for Additional Request Edric 2024/02/26
     try:
@@ -2434,15 +2406,11 @@ def is_error_on_required_F(request, form):
     except:
          print(se_ro_updated)
     #End adding for Additional Request Edric 2024/02/26 
-     
-    print(se_ro_updated)
     
     if (se_ro_updated not in ('0', '1') or se_ro_updated in ('', 'None')):
         has_error = True
-
         form.fields['se_ro_updated'].widget.attrs['class'] = "form-control radioErr"    
         
-
     print('END : is_error_on_required_F')     
     return has_error
 
@@ -2768,8 +2736,6 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
 def ncr_verify_accept(request):
     print('START: ncr_verify_accept')
     
-    
-    
     ncr_no = request.POST.get('ncrNo', None)
     check_phase = request.POST.get('check_phase', None) 
     from_email_id = request.POST.get('from_email_id', None)     
@@ -2798,7 +2764,6 @@ def ncr_verify_accept(request):
     
     cancelMessage = request.POST.get('cancelMessage', None)
     
-    
     try:
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)   
         
@@ -2808,24 +2773,19 @@ def ncr_verify_accept(request):
     if 'logged_user_chapa_no' in request.session:
         logged_user_chapa_no = request.session['logged_user_chapa_no'] 
 
-    
      #Start adding due to bug Edric 2024/03/11
     else:
         error_message = 'Can\'t accept/deny. No user is saved in session.'
         context = {'error_message': error_message}
         return render(request, 'NCRMgmntSystem/login.html', context)
     #End adding due to bug Edric 2024/03/11
-    
-
 
     #set database column 
     n.update_date = current_datetime
     n.update_user_id = logged_user_chapa_no
-
     
     #Start adding for additional request Edric Marinas 2024/04/04
-    if hidden_process == 'denyCancelRequest':
-        
+    if hidden_process == 'denyCancelRequest': 
         try:
             DenyReason.objects.get(ncr_no=ncr_no,phase='G')
             try:
@@ -2857,7 +2817,6 @@ def ncr_verify_accept(request):
                 DenyReason.objects.get(ncr_no=ncr_no,phase='H')
                 p = 'H'
             try:
-                print(">>>>>"+cancelMessage)
                 cursor=connection.cursor()
                 cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(),reason = '"+cancelMessage+"',denied_by = '"+request.session["logged_user_chapa_no"] +"',phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
                 success_message = "NCR cancellation success"
@@ -2881,15 +2840,9 @@ def ncr_verify_accept(request):
         sendmail_ncr_cancelled(n,logged_user_chapa_no)
         n.save()
 
-            
-
     #End adding for additional request Edric Marinas 2024/04/04
-
-    
-    
     
     if hidden_process == 'acceptA1':    
-        
         n.ic_incharge = request.POST.get('ic_incharge', None) 
         
         if (n.nc_conformed_by not in (None ,'')):
@@ -3022,8 +2975,8 @@ def ncr_verify_accept(request):
             
     elif hidden_process == 'acceptC1':  
         #Start added n.ca_necessary == "0" due to bug Edric 2024/04/11 When CA necessary is no it wont close the NCR if there is value on step D
-        if (n.ca_necessary == "0" or n.ca_description in (None ,'') ): 
-            
+        #if (n.ca_necessary == "0" or n.ca_description in (None ,'') ): 
+        if (n.ca_necessary == "1" or n.ca_description in (None ,'') ):     
             if n.ca_necessary == "1":
                 if (n.nc_conformed_by not in (None ,'')):
                     if (n.ic_incharge not in (None ,'') ):            
@@ -3032,8 +2985,10 @@ def ncr_verify_accept(request):
                              try:
                                  e2 =  Employee.objects.get(chapano=n.ic_incharge)
                                  try:
-                                     sendmail_verify_accept('C-Yes', n) 
-                                     send_email_success = True
+                                     #sendmail_verify_accept('C-Yes', n) 
+                                     if n.ca_checked_by_sh != n.rca_approve_by:
+                                         sendmail_verify_accept('acceptC1', n) 
+                                         send_email_success = True
 
                                      try:
                                          n.rca_approve_date = current_datetime    
@@ -3114,7 +3069,6 @@ def ncr_verify_accept(request):
               
         else:   
             
-            
             if (n.rca_approve_by not in (None ,'')):
                 try:
                     e1 =  Employee.objects.get(chapano=n.rca_approve_by)
@@ -3186,7 +3140,8 @@ def ncr_verify_accept(request):
                     
                     if str(n.rca_approve_status) == '1' and str(n.ca_check_by_sh_status) == '1':        
                         try:
-                            sendmail_verify_accept('2', n) 
+                            #sendmail_verify_accept('2', n) 
+                            sendmail_verify_accept('acceptD1', n)
                             send_email_success = True
                             try:
                                 cursor=connection.cursor()
@@ -3209,7 +3164,8 @@ def ncr_verify_accept(request):
 
     elif hidden_process == 'acceptC2D2':     
         try:
-            sendmail_verify_accept('3', n) 
+            #sendmail_verify_accept('3', n) 
+            sendmail_verify_accept('acceptC2D2', n)
             send_email_success = True
             try:
                 n.ca_approved_date_by_mgr = current_datetime   
@@ -3363,10 +3319,6 @@ def ncr_verify_accept(request):
 
     #elif process == 'denyA1':
     elif hidden_process == 'denyA1':    
-        
-        print('hidden_process >>>> ' + str(hidden_process))
-        
-        #error_message = create_deny_reason(n.ncr_no, n.rev_no, "A", reasonA1, n.nc_conformed_by, current_datetime)
         error_message = create_deny_reason(n.ncr_no, n.rev_no, "A", reason, n.nc_conformed_by, current_datetime)
         
         if error_message in ('', None):
@@ -3411,11 +3363,7 @@ def ncr_verify_accept(request):
                 error_message = "Database error ocurred while updating data with ncr_no =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"
     
     #elif process == 'denyB1': 
-    elif hidden_process == 'denyB1':     
-        
-        print('hidden_process >>>> ' + str(hidden_process))
-        
-        #error_message = create_deny_reason(n.ncr_no, n.rev_no, "B", reasonB1, n.ic_approve_by, current_datetime)
+    elif hidden_process == 'denyB1':             
         error_message = create_deny_reason(n.ncr_no, n.rev_no, "B", reason, n.ic_approve_by, current_datetime)
         
         if error_message in ('', None):
@@ -3439,16 +3387,11 @@ def ncr_verify_accept(request):
     #elif process == 'denyC1':
     elif hidden_process == 'denyC1': 
         
-        print('hidden_process >>>> ' + str(hidden_process))
-        
-        
-        
         #Start adding due to bug Edric Marinas 2024/02/22
         n.status = '4'
         if n.status not in ('',None): 
             n.close_date = None
         #End adding due to bug Edric Marinas 2024/02/22
-            
             
         #error_message = create_deny_reason(n.ncr_no, n.rev_no, "C", reasonC1, n.rca_approve_by, current_datetime)
         error_message = create_deny_reason(n.ncr_no, n.rev_no, "C", reason, n.rca_approve_by, current_datetime)
@@ -3480,11 +3423,7 @@ def ncr_verify_accept(request):
     #elif process == 'denyD1':
     elif hidden_process == 'denyD1':     
         
-        print('hidden_process >>>> ' + str(hidden_process))
-        
         #error_message = create_deny_reason(n.ncr_no, n.rev_no, "C", reasonD1, n.ca_checked_by_sh, current_datetime)
-        
-        
         
         #Start modify Edric  2024/03/21
         #error_message = create_deny_reason(n.ncr_no, n.rev_no, "C", reason, n.ca_checked_by_sh, current_datetime)
@@ -3684,7 +3623,13 @@ def sendmail_create(mailType, n, userId):
         send_to = e.email
         #user_id = e.chapano
         #content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section. Kindly confirm by clicking\non the link below to proceed with NCR process.\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks\nfor Minor NC or 1 month for Major NC.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
-        content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly click\non the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    NCR must be closed within 2 weeks for Minor NC and 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+        
+        #content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly click\non the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    NCR must be closed within 2 weeks for Minor NC and 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+        if (n.classification == '1'): 
+            content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly click\non the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    NCR must be closed within 2 weeks for Minor NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+        if (n.classification == '2'): 
+            content = "Sir/Madam,\n\n    A Nonconformance has been issued in your section by Mr./Ms. " + e1.firstname + " " + e1.lastname + ". Kindly click\non the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + e.chapano + "\n\n    NCR must be closed within 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
+
 
     elif mailType == 'B':
         e =  Employee.objects.get(chapano=n.ic_approve_by)
@@ -3777,10 +3722,7 @@ def sendmail_create(mailType, n, userId):
     return    
  
 # Send mail for NCOA02 screen 
-def sendmail_verify_accept(mailType, n):
-
-    print("sendmail_verify_accept >>" + mailType) 
-    
+def sendmail_verify_accept(mailType, n):    
     subject = 'NCR Accept Status Notification: '  + str(n.ncr_no)       
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     e1 =  Employee.objects.get(chapano=n.nc_conformed_by)
@@ -3828,7 +3770,6 @@ def sendmail_verify_accept(mailType, n):
                 print("(in charge) Email sent to ChapaNo: " + e.chapano +" Email: "+  send_to)
         except:
             print("ERROR 2") 
- 
         
         #Discovered By 2024/05/08
         try:
@@ -3887,11 +3828,19 @@ def sendmail_verify_accept(mailType, n):
                 #send_to = e.email
                 
         #End modify for additional request Edric Charles C. Marinas 2024/03/04
-        
-    elif mailType == '2':
+
+    elif mailType == 'acceptC1':
+        e1 =  Employee.objects.get(chapano=n.rca_approve_by)
+        e2 =  Employee.objects.get(chapano=n.ca_checked_by_sh)
+        send_to = e2.email
+        user_id = e2.chapano
+        content = "Sir/Madam,\n\n        The content of root cause analysis was accepted by Mr./Ms. " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm content for your approval by clicking on the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        send_mail(subject, content, from_email, [send_to], fail_silently=False,)   
+
+    #elif mailType == '2':
+    elif mailType == 'acceptD1':    
         e1 =  Employee.objects.get(chapano=n.ca_checked_by_sh)
         e2 =  Employee.objects.get(chapano=n.ca_approved_by_mgr)
-        
         send_to = e2.email
         user_id = e2.chapano
         
@@ -3903,15 +3852,14 @@ def sendmail_verify_accept(mailType, n):
         
         send_mail(subject, content, from_email, [send_to], fail_silently=False,)    
        
-        
-       
-    elif mailType == '3':
+    #elif mailType == '3':
+    elif mailType == 'acceptC2D2':
         e1 =  Employee.objects.get(chapano=n.ca_approved_by_mgr)
         e2 =  Employee.objects.get(chapano=n.ic_incharge)
         send_to = e2.email
         user_id = e2.chapano
 
-        content = "Sir/Madam,\n\n        The content of root cause analysis and corrective action has been accepted by Grp Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm by clicking on the link below to proceed with D. Corrective Action To the and Result of Action.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+        content = "Sir/Madam,\n\n        The content of root cause analysis and corrective action has been accepted by Grp Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm by clicking on the link below to proceed with E. Result Of Action and F. Show Effectiveness .\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
         send_mail(subject, content, from_email, [send_to], fail_silently=False,)  
     
     elif mailType == 'acceptE':
@@ -3934,20 +3882,15 @@ def sendmail_verify_accept(mailType, n):
             e2 =  Employee.objects.get(chapano=n.se_check_by_qa)
             send_to = e2.email
             user_id = e2.chapano
-            content = "Sir/Madam,\n\n        The result and effectiveness of corrective action had been analyzed and accepted by Grp Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n and is requesting to close this NCR.\n\n    Kindly confirm content for approval by clicking on the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
+            content = "Sir/Madam,\n\n        The result and effectiveness of corrective action had been analyzed and accepted by Grp Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ", and is requesting to close this NCR.\n\n    Kindly confirm content for approval by clicking on the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
             
         elif (n.classification == '2' and n.se_description not in ('', None) and n.se_ro_updated != '1'):
             e2 =  Employee.objects.get(chapano=n.ra_check_by_staff)
             send_to = e2.email
             user_id = e2.chapano 
             content = "Sir/Madam,\n\n        The result and effectiveness of corrective action had been analyzed and accepted by\n\n Grp Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ", but your Risk and Oppurtunity is not yet updated.\n\n    Kindly update your Risk and Oppurtunity before QA checking.\n\n     " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
-        
-
-
+    
         send_mail(subject, content, from_email, [send_to], fail_silently=False,)  
-        
-        
-        
         
     elif mailType == '6':
         send_to = ''
@@ -3984,19 +3927,13 @@ def sendmail_verify_accept(mailType, n):
             
         #Discovered By 2024/05/08
         try:
-            
             send_to = n.nc_discovered_by_email
             rev = str(n.rev_no)
-
             content = "Sir/Madam,\n\n    This NCR was closed by QA Mgr: " +  e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    and will be compiled in NCR Archive\n\n    of " + nxt[1] + ".\n\n     Location: " + nxt[0] + "\n\n   Kindly confirm by clicking on link below.\n\n" + PROJ_URL + "ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
             send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-            print("(Discovered By) Email sent to Email: "+  send_to)
-
         except:
             pass
         #End 
-
-
 
         try:
             #SH
@@ -4040,43 +3977,21 @@ def sendmail_verify_accept(mailType, n):
         #send_mail(subject, content, from_email, send_to, fail_silently=False,)
         
         #End Modifying for additional request Edric Charles Marinas 2024.03.06
-        
-          
     
     elif mailType == '7':
-        print("mailType 7")
-        #e1 =  Employee.objects.get(chapano=n.nc_conformed_by)
-        #e2 =  Employee.objects.get(chapano=n.ic_incharge)
         e1 =  Employee.objects.get(chapano=n.ic_approve_by)
         e2 =  Employee.objects.get(chapano=n.ic_incharge)
         send_to = e2.email
         user_id = e2.chapano
 
-        #content = "Sir/Madam,\n\n        The content of immediate correction had been approved by " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm by clicking on the link below to proceed with next step.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."        
-
         if (n.classification == '1'):
             content = "Sir/Madam,\n\n        The content of immediate correction had been approved by Mr./Ms. " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm by clicking on the link below to proceed with your C. Root Cause Analysis and D. Corrective Action To The Cause for this NCR.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Please accomplish necessary action and verify effectiveness within 2 weeks for Minor NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."     
-            
         elif (n.classification == '2'):
-            #e2 =  Employee.objects.get(chapano=n.ra_check_by_staff)
-            #send_to = e2.email
-            #user_id = e2.chapano 
             content = "Sir/Madam,\n\n        The content of immediate correction had been approved by Mr./Ms. " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ".\n\n    Kindly confirm by clicking on the link below to proceed with your C. Root Cause Analysis and D. Corrective Action To The Cause for this NCR.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Please accomplish necessary action and verify effectiveness within 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply." 
         
         send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-        
 
-
-
-
-
-
-
-
-
-
-    elif mailType == 'C-Yes':
-        
+    elif mailType == 'C-Yes':        
         e1 =  Employee.objects.get(chapano=n.rca_approve_by)
         e2 =  Employee.objects.get(chapano=n.rca_incharge)
         send_to = e2.email        
@@ -4087,8 +4002,6 @@ def sendmail_verify_accept(mailType, n):
     elif mailType == 'C-No':
         #Start modify due to bugs Edric 02/20/2024
         send_to = ''   
-        
-        
         
         #sql = "Select archive_location, name FROM project WHERE dept_id = '" + n.dept_id + "' AND id = '" + n.project_id + "'"
         sql = "Select archive_location, name FROM project WHERE dept_id = '" + str(n.dept_id) + "' AND id = '" + str(n.project_id) + "'"
@@ -4170,14 +4083,13 @@ def sendmail_verify_accept(mailType, n):
 # Send mail for NCOA02 screen 
 def sendmail_verify_deny(ncr_no, checker_id, in_charged_id, rejectedStage,):
     print('START: sendmail_verify_deny')
+    
     error_message = ''
     subject = 'NCR Deny Status Notification: ' + str(ncr_no)        
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     send_to = ''  
     content = ''
     rejectedStageTitle = ''
-    
-        
     
     try:
         e1 =  Employee.objects.get(chapano=checker_id)
@@ -4330,9 +4242,8 @@ def ncr_create(request):
     if request.method != 'POST':
         raise Http404('Only POSTs are allowed')
     else:
-        print("This>>>>>>>>>>>>>>>")
         form = NCRCreateForm(request.POST or None)   
-    
+
     ncr_no = form.data.get('ncr_no') 
     reason_action_not_effective = form.data.get('reason_action_not_effective') 
     
@@ -4341,7 +4252,7 @@ def ncr_create(request):
     
     is_form_valid = False
     send_email_success = True
-    
+
     if error_message in ('', None): 
         if form.is_valid():
             is_form_valid = True;
@@ -4355,92 +4266,87 @@ def ncr_create(request):
                 try:
                     n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)     
                     
-                    if is_error_on_not_changed(request, form):
-                        error_message = 'No changes was made.' 
+                    #if is_error_on_not_changed(request, form):
+                    #    error_message = 'No changes was made.' 
                         
-                    else:
-                        reason_action_not_effective = form.cleaned_data['reason_action_not_effective']     
+                    #else:
+                    reason_action_not_effective = form.cleaned_data['reason_action_not_effective']   
+
+                    if reason_action_not_effective not in ('', None):
+                        #return_to_C (action not effective)
+                        edit_cause = '2' 
                     
-                        if reason_action_not_effective not in ('', None):
-                            #return_to_C (action not effective)
-                            edit_cause = '2' 
-                    
-                            #archive current NCR
+                        #archive current NCR
+                        try:
+                            cursor=connection.cursor()
+                            #copy current NCR to archive
+                            cursor.execute("INSERT INTO ncr_detail_mstr_history SELECT * FROM ncr_detail_mstr WHERE ncr_no = '" + n.ncr_no + "'")
+                            #set E info to database
+                            cursor.execute("UPDATE ncr_detail_mstr_history SET ra_action_effective = '1', ra_check_by_staff_status = '0', ra_check_date_by_staff = SYSDATE(), ra_check_by_staff = '" + 
+                                       logged_user_chapa_no + "', ra_description = '" + reason_action_not_effective + "' WHERE ncr_no = '" + n.ncr_no + "' AND rev_no = '" + str(n.rev_no) + "'")
+                                
                             try:
-                                cursor=connection.cursor()
-                                #copy current NCR to archive
-                                cursor.execute("INSERT INTO ncr_detail_mstr_history SELECT * FROM ncr_detail_mstr WHERE ncr_no = '" + n.ncr_no + "'")
-                                #set E info to database
-                                cursor.execute("UPDATE ncr_detail_mstr_history SET ra_action_effective = '1', ra_check_by_staff_status = '0', ra_check_date_by_staff = SYSDATE(), ra_check_by_staff = '" + 
-                                           logged_user_chapa_no + "', ra_description = '" + reason_action_not_effective + "' WHERE ncr_no = '" + n.ncr_no + "' AND rev_no = '" + str(n.rev_no) + "'")
-                                
-                                try:
-                                    ncr_create_update(request, form, ncr_no, logged_user_chapa_no, edit_cause)                            
-                                except DatabaseError:
-                                    
-                                    #db_update_success = False
-                                    error_message = 'Error occured while updating NCR data in database. (NCR#' + ncr_no +')'       
-                                    
-                                except SMTPException:   
-                                    send_email_success = False
-                                    error_message = "There was an error sending an email."     
-                    
-                            except IntegrityError:
-                                error_message = 'Error occured while inserting NCR data in database. (Duplicate Entry - NCR#' + ncr_no +')'       
-                                
+                                ncr_create_update(request, form, ncr_no, logged_user_chapa_no, edit_cause)                            
                             except DatabaseError:
-
-                                error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')'   
                                 
-                            finally:    
-                                cursor.close
-                        
-                        else:
-                            #check if NCR was denied    
-                            deny_cnt = 0
-                            sqlStmt = "SELECT count(*) as cnt FROM DENY_REASON WHERE ncr_no = '" + n.ncr_no + "' AND rev_no = '" + str(n.rev_no) + "'"     
-
-                            with connection.cursor() as c:
-                                c.execute(sqlStmt)
-                                result = c.fetchone()
-                                deny_cnt = result[0]
-
-                            #if denied NCR, archive it
-                            if deny_cnt > 0:      
-                                #inputs denied 
-                                edit_cause = '1'
-
-                                try:
-
-                                    cursor=connection.cursor()
-                                    
-                                    
-                                    cursor.execute("INSERT INTO ncr_detail_mstr_history SELECT * FROM ncr_detail_mstr WHERE ncr_no = '" + ncr_no + "'");
-
-
-                                except IntegrityError:
-
-                                    error_message = 'Error occured while inserting NCR data in database. (Duplicate Entry - NCR#' + ncr_no +')'       
-
-                                except DatabaseError:
-                                    error_message = 'Error occured while inserting NCR data in database. (NCR# '+ncr_no+') '
-
-                                finally:    
-                                    cursor.close
-                             
-                            try:
-
-                                n = ncr_create_update(request, form, ncr_no, logged_user_chapa_no, edit_cause)   
-
-                                if n.classification == '2' and n.se_description in ('', None) and n.ra_description not in ('', None) :      
-                                    send_email_success = False
-
-                            except DatabaseError:
+                                #db_update_success = False
                                 error_message = 'Error occured while updating NCR data in database. (NCR#' + ncr_no +')'       
-    
+                                    
                             except SMTPException:   
                                 send_email_success = False
-                                error_message = "There was an error sending an email."        
+                                error_message = "There was an error sending an email."     
+                    
+                        except IntegrityError:
+                            error_message = 'Error occured while inserting NCR data in database. (Duplicate Entry - NCR#' + ncr_no +')'       
+                                
+                        except DatabaseError:
+
+                            error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')'   
+                                
+                        finally:    
+                            cursor.close
+                        
+                    else:
+                        #check if NCR was denied    
+                        deny_cnt = 0
+                        sqlStmt = "SELECT count(*) as cnt FROM DENY_REASON WHERE ncr_no = '" + n.ncr_no + "' AND rev_no = '" + str(n.rev_no) + "'"     
+
+                        with connection.cursor() as c:
+                            c.execute(sqlStmt)
+                            result = c.fetchone()
+                            deny_cnt = result[0]
+
+                        #if denied NCR, archive it
+                        if deny_cnt > 0:      
+                            #inputs denied 
+                            edit_cause = '1'
+
+                            try:
+                                cursor=connection.cursor()
+                                cursor.execute("INSERT INTO ncr_detail_mstr_history SELECT * FROM ncr_detail_mstr WHERE ncr_no = '" + ncr_no + "'");
+
+                            except IntegrityError:
+
+                                error_message = 'Error occured while inserting NCR data in database. (Duplicate Entry - NCR#' + ncr_no +')'       
+
+                            except DatabaseError:
+                                error_message = 'Error occured while inserting NCR data in database. (NCR# '+ncr_no+') '
+
+                            finally:    
+                                cursor.close
+                             
+                        try:
+                            n = ncr_create_update(request, form, ncr_no, logged_user_chapa_no, edit_cause)   
+
+                            if n.classification == '2' and n.se_description in ('', None) and n.ra_description not in ('', None) :      
+                                send_email_success = False
+
+                        except DatabaseError:
+                            error_message = 'Error occured while updating NCR data in database. (NCR#' + ncr_no +')'       
+    
+                        except SMTPException:   
+                            send_email_success = False
+                            error_message = "There was an error sending an email."        
                 
                 except NcrDetailMstr.DoesNotExist:
                     error_message = "Record with NCR#" + ncr_no + "does not exist in NCR_DETAIL_MSTR!"
@@ -4449,7 +4355,6 @@ def ncr_create(request):
                 db_transact = 'I' #insert 
 
                 try:
-                    
                     n = ncr_create_insert(request, form, logged_user_chapa_no)  
                     ncr_no = n.ncr_no
 
@@ -4472,6 +4377,14 @@ def ncr_create(request):
                     send_email_success = False
                     error_message = "There was an error sending an email."    
 
+    #START: Add reginald-jsp 2025.01.24
+    if error_message in ('', None) and request.session['error_message'] not in ('', None):
+        try:
+            error_message = request.session['error_message']
+            request.session['error_message'] = ''
+        except Exception :
+            print('error_message not yet in session')
+        #END: Add reginald-jsp 2025.01.24
 
     if error_message not in ('', None) or is_form_valid == False:
 
@@ -4590,8 +4503,6 @@ def ncr_create_insert(request, form, login_user_chapa_no):
         nxt = c.fetchone()
         serial_no = nxt[0]
         
-        print('serial_no >>>' + str(serial_no))     
-        
     #set project_code    
     project_code = '?'    
     try:
@@ -4607,9 +4518,6 @@ def ncr_create_insert(request, form, login_user_chapa_no):
         error_message = 'Record with id = ' + project.id + ' doesn''t exist in Dept table.'
             
     ncr_no = 'NCR-' + str(ncr_issue_date) + '-' + dept_code + '-' + project_code + '-' + (str(serial_no)).zfill(4) 
-    
-       
-    print('ncr_no =' + ncr_no)
         
     #set deadline
     days_in_month = 0
@@ -4670,7 +4578,6 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     print('START : ncr_create_update')
     
     current_datetime = datetime.datetime.now()
-
     source = form.cleaned_data['source']
     other_source = form.cleaned_data['other_source']
     classification = form.cleaned_data['classification']
@@ -4771,7 +4678,6 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         nc_conformed_by_chapano = ''
         if nc_conformed_by not in ('', None):
             nc_conformed_by_chapano = nc_conformed_by.chapano   
-
         n_consumed_mh1 = ''
         if (n.consumed_mh1 not in ('', None)):
             n_consumed_mh1= n.consumed_mh1     
@@ -4800,6 +4706,13 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         #END Add CJ.AVILA
 
         #C. Root Cause Analysis(5 Whys, Fishbone, etc)    
+
+        # START: Added 2025.01.23 reginaldo-jsp
+        # For major NCRs, its necessary to Proceed to D 
+        if classification == '2' and n.ic_approve_status == '1' and ca_necessary in ('', None):
+            ca_necessary = '1'   
+        # END: Added 2025.01.23 reginaldo-jsp
+      
         n_rca_description = ''    
         if (n.rca_description not in ('', None)):
             n_rca_description = n.rca_description
@@ -4858,9 +4771,10 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         n_ra_followup_date = ''    
         if (n.ra_followup_date not in ('', None)):
             n_ra_followup_date = n.ra_followup_date  
+            n_ra_followup_date = n_ra_followup_date.strftime("%Y-%m-%d")
         ra_followup_date_str = ''    
         if (ra_followup_date not in ('', None)):
-            ra_followup_date_str = ra_followup_date      
+            ra_followup_date_str = str(ra_followup_date)      
     
         #F. Show Effectiveness  
         n_se_description = ''    
@@ -4899,7 +4813,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         has_change_D = False
         has_change_E = False
         has_change_F = False
-        
+                
         #Edric Marinas 2024/04/04
         if hidden_request_cancel != '7':
         
@@ -4962,7 +4876,7 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                 #START Add CJ.AVILA
                 n.consumed_mh3 = consumed_mh3
                 #END Add CJ.AVILA
-                
+
                 n.rca_create_date  = current_datetime        
     
                 #n.ca_necessary = ca_necessary
@@ -4978,7 +4892,6 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                 if edit_cause != '0':
                     n.rca_approve_date = None
                     n.rca_approve_status = None
-    
                     n.ca_check_date_by_sh = None
                     n.ca_check_by_sh_status = None
                     n.ca_approved_date_by_mgr = None
@@ -5024,9 +4937,11 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
             if edit_cause == '2' and ca_description in ('', None):
                 n.ca_checked_by_sh = None
                 n.ca_approved_by_mgr = None
-    
+
             #E. Result of action           
             if n_ra_description != ra_description or n_ra_action_effective != ra_action_effective or n_ra_followup_date != ra_followup_date_str or n_ra_check_by_sh != ra_check_by_sh_chapano or n_se_check_by_mgr != se_check_by_mgr_chapano or n_se_check_by_qa != se_check_by_qa_chapano:        
+            #if n_ra_description != ra_description or n_ra_action_effective != ra_action_effective or n_ra_check_by_sh != ra_check_by_sh_chapano or n_se_check_by_mgr != se_check_by_mgr_chapano or n_se_check_by_qa != se_check_by_qa_chapano:        
+             
                 has_change_E = True  
     
                 n.ra_description = ra_description 
@@ -5089,87 +5004,124 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         n.update_date = current_datetime
         #Start modifying for additional request Edric Marinas 2024/04/17
         try:
-            has_update = False
+            #has_update = False
+            b_database_updated = False
+            b_email_sent = False 
 
             if has_change_A or has_change_B or has_change_C or has_change_D or has_change_E or has_change_F:
-                has_update = True
-            
-            #update data
-            n.save()
-            request.session["Message"] = 'NCR data was succesfully updated in database and email notification was sent.'
-        
+                #has_update = True
+                #update data
+                n.save()
+                b_database_updated = True
+
             #S = save SN = Save and notify
             if S_or_SN == 'SN':
+            
                 #send email notification
                 if edit_cause == '2' not in ('', None):
                     sendmail_create('E-returnToC', n, login_user_chapa_no)
-
+                    b_email_sent = True
+                    
                 elif has_change_A:
                     sendmail_create('A', n, login_user_chapa_no)
+                    b_email_sent = True
 
                 elif has_change_B:   
                     sendmail_create('B', n, login_user_chapa_no)
+                    b_email_sent = True
 
-                elif has_change_C and has_change_D:
-                    sendmail_create('C&D', n, login_user_chapa_no) 
-
-                elif has_change_C and n. ca_necessary == '1':
-                    sendmail_create('C-Yes', n, login_user_chapa_no)
-
-                elif has_change_C and n.ca_necessary == '0':    
+                #START: Modify reginaldo-jsp 2025.01.24   
+                #elif has_change_C and has_change_D:
+                #    sendmail_create('C&D', n, login_user_chapa_no) 
+                #
+                #elif has_change_C and n. ca_necessary == '1':
+                #    sendmail_create('C-Yes', n, login_user_chapa_no)
+                #
+                #elif has_change_C and n.ca_necessary == '0':    
+                #    sendmail_create('C-No', n, login_user_chapa_no)
+                #
+                #elif has_change_D:    
+                #    sendmail_create('D', n, login_user_chapa_no)
+                #
+                #elif n.classification == '2' and n.se_description not in ('', None):  
+                #    if has_change_E and has_change_F and n.ra_action_effective != '2':
+                #        sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                #       
+                #    elif has_change_E and n.ra_action_effective != '2':
+                #        sendmail_create('E', n, login_user_chapa_no)
+                # 
+                #    elif has_change_F and n.ra_action_effective != '2':    
+                #        sendmail_create('F', n, login_user_chapa_no)
+                # 
+                #    elif classification == '1' and ra_description not in ('', None) and n.ra_action_effective != '2':
+                #        sendmail_create('E', n, login_user_chapa_no)
+                #        
+                ##Start adding for additional request Edric 2024/03/06
+                #else:
+                #    request.session["Message"] = 'Email notification was sent.'
+                #    if n.classification == '2' and n.se_description not in ('', None):
+                #        
+                #        if classification == '1' and ra_description not in ('', None):
+                #            sendmail_create('E', n, login_user_chapa_no)
+                #            
+                #        elif has_desc_F and n.ra_action_effective != '2':
+                #            sendmail_create('F', n, login_user_chapa_no)
+                #            
+                #        elif has_desc_E and n.ra_action_effective != '2':
+                #            sendmail_create('E', n, login_user_chapa_no)
+                #
+                #        elif has_desc_E and has_desc_F and n.ra_action_effective != '2':
+                #            sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                #        
+                #    elif has_desc_D:
+                #        sendmail_create('C_approved-y/n', n, login_user_chapa_no)
+                #   
+                #    elif has_desc_C and n.ca_necessary == '0':    
+                #        sendmail_create('C-No', n, login_user_chapa_no)
+                # 
+                #    elif has_desc_C and n.ca_necessary == '1':
+                #        sendmail_create('C-Yes', n, login_user_chapa_no)
+                #        
+                #    elif has_desc_B:
+                #        sendmail_create('B', n, login_user_chapa_no)
+                #
+                #    elif has_desc_A:
+                #        sendmail_create('A', n, login_user_chapa_no)
+                elif (has_change_C or has_change_D) and n.ca_necessary == '0':    
                     sendmail_create('C-No', n, login_user_chapa_no)
+                    b_email_sent = True
 
-                elif has_change_D:    
-                    sendmail_create('D', n, login_user_chapa_no)
+                elif has_change_C or has_change_D:
+                    sendmail_create('C&D', n, login_user_chapa_no) 
+                    b_email_sent = True
 
-                elif n.classification == '2' and n.se_description not in ('', None):  
-                    if has_change_E and has_change_F and n.ra_action_effective != '2':
+                elif (has_change_E or has_change_F) and ra_action_effective not in ('', None)  and ra_action_effective != '2':
+                    sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                    b_email_sent = True
+                
+                else: 
+                    phase = str(declarePhase(ncr_no))
+
+                    if  phase == '5' and ra_action_effective not in (None, '', '2'):
                         sendmail_create('E-proceedToF', n, login_user_chapa_no)
+                        b_email_sent = True
 
-                    elif has_change_E and n.ra_action_effective != '2':
-                        sendmail_create('E', n, login_user_chapa_no)
+                    elif  phase == '2' and ca_necessary == '1':
+                        sendmail_create('C&D', n, login_user_chapa_no)
+                        b_email_sent = True
 
-                    elif has_change_F and n.ra_action_effective != '2':    
-                        sendmail_create('F', n, login_user_chapa_no)
-
-                    elif classification == '1' and ra_description not in ('', None) and n.ra_action_effective != '2':
-                        sendmail_create('E', n, login_user_chapa_no)
-                      
-                        
-                #Start adding for additional request Edric 2024/03/06
-                else:
-                    request.session["Message"] = 'Email notification was sent.'
-                    if n.classification == '2' and n.se_description not in ('', None):
-                        
-                        if classification == '1' and ra_description not in ('', None):
-                            sendmail_create('E', n, login_user_chapa_no)
-
-                            
-                        elif has_desc_F and n.ra_action_effective != '2':
-                            sendmail_create('F', n, login_user_chapa_no)
-
-                            
-                        elif has_desc_E and n.ra_action_effective != '2':
-                            sendmail_create('E', n, login_user_chapa_no)
-
-                            
-                        elif has_desc_E and has_desc_F and n.ra_action_effective != '2':
-                            sendmail_create('E-proceedToF', n, login_user_chapa_no)
-                        
-                    elif has_desc_D:
-                        sendmail_create('C_approved-y/n', n, login_user_chapa_no)
-     
-                    elif has_desc_C and n.ca_necessary == '0':    
+                    elif  phase == '2' and ca_necessary == '0':
                         sendmail_create('C-No', n, login_user_chapa_no)
+                        b_email_sent = True
 
-                    elif has_desc_C and n.ca_necessary == '1':
-                        sendmail_create('C-Yes', n, login_user_chapa_no)
-                        
-                    elif has_desc_B:
+                    elif  phase == '1':
                         sendmail_create('B', n, login_user_chapa_no)
+                        b_email_sent = True
 
-                    elif has_desc_A:
+                    elif  phase == '0':
                         sendmail_create('A', n, login_user_chapa_no)
+                        b_email_sent = True        
+                #END: Modify reginaldo-jsp 2025.01.24    
                     
             #Cancel request 2024/04/04
             elif hidden_request_cancel == '7':
@@ -5192,19 +5144,38 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                    
                     if request.session["Message"] not in (''):
                         n.status = '7'
+                        #START: modify reginaldo-jsp 2025.01.24 
+                        #n.save()
+                        #sendmail_NCR_cancel_request(phase, n)
                         n.save()
+                        b_database_updated = True
                         sendmail_NCR_cancel_request(phase, n)
+                        b_email_sent = True
+                        #END: modify reginaldo-jsp 2025.01.24 
                     else:
                        error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')' 
-                       
-                
-            elif has_update:
-                n.save()
-                request.session["Message"] = "NCR data was succesfully updated in database" 
+
+            #START: modify reginaldo-jsp 2025.01.24     
+            #elif has_update:
+            #if has_update:
+            #    n.save()
+
+            if b_database_updated and b_email_sent :
+                request.session["Message"] = "NCR data was succesfully updated in database and notification via email was sent." 
+            elif b_database_updated  :
+                request.session["Message"] = "NCR data was succesfully updated in database."     
+            elif b_email_sent :
+                request.session["Message"] = "Notification via email was sent."     
             else:
-                request.session["Message"] = "Database was mot updated nor Email notification was sent because there was no change in inputs"         
+                #request.session["Message"] = "Database was not updated nor Email notification was sent because there was no change in inputs"         
+                #request.session["Message"] = "<h4><font color='red'>Database was not updated nor Email notification was sent because there was no change in </font></h4>"         
+                if S_or_SN == 'SN':
+                    request.session["error_message"] = "No changes was made. No notification was sent"
+                else:
+                    request.session["error_message"] = "No changes was made."        
+
+            #END: modify reginaldo-jsp 2025.01.24 
             #End adding for additional request Edric 2024/03/06
-            
                     
         except SMTPException:                   
             raise
@@ -5378,21 +5349,6 @@ def employee_password_change(request, chapano):
 def declarePhase(ncr_no):
 
     phase = ''
-    """
-    has_date_A = False
-    has_date_B = False
-    has_date_C = False
-    has_date_d = False
-    has_date_D = False
-    has_date_E = False
-    has_date_f = False
-    has_date_F = False
-    
-    
-
-        phase    
-
-    """  
 
     try:
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)      
@@ -5410,8 +5366,14 @@ def declarePhase(ncr_no):
             phase = '3'
         elif n.ic_approve_date not in ('',None):
             phase = '2'
-        elif n.nc_conformed_by not in ('',None):
+        #START: Modify reginaldo-jsp 2025.01.24    
+        #elif n.nc_conformed_by not in ('',None):
+        #    phase = '1'    
+        elif n.nc_conformed_date not in ('',None):
             phase = '1'
+        else:
+            phase = '0'
+        #END: Modify reginaldo-jsp 2025.01.24        
     except:
         print("Declare Phase Error")
 
@@ -5500,10 +5462,8 @@ def sendmail_NCR_cancel_request(mailType, n):
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     send_to = ''  
     
-    
-    if mailType == '0':
-
-        
+    #if mailType == '0':
+    if mailType == '1':
         #d = DenyReason.objects.get(ncr_no=n.ncr_no,)
 
         e =  Employee.objects.get(chapano=n.ic_incharge)
@@ -5513,33 +5473,28 @@ def sendmail_NCR_cancel_request(mailType, n):
         send_mail(subject, content, from_email, [send_to, ], fail_silently=False,)
         return
     
-    
-    elif mailType == '1':
+    #elif mailType == '1':
+    elif mailType == '0':
         e =  Employee.objects.get(chapano=n.nc_conformed_by)
         send_to = e.email
         user_id = e.chapano
-        
-
+ 
     elif mailType == '2':
         e =  Employee.objects.get(chapano=n.ic_approve_by)
         send_to = e.email
         user_id = e.chapano
-        
     
     elif mailType == '3':
         e =  Employee.objects.get(chapano=n.rca_approve_by)
         send_to = e.email
         user_id = e.chapano
-        
-
 
     elif mailType == '4':
         e =  Employee.objects.get(chapano=n.ca_checked_by_sh)
         send_to = e.email
         user_id = e.chapano
         
-    elif mailType == '5':
-        
+    elif mailType == '5':        
         try:
             e =  Employee.objects.get(chapano=n.ca_checked_by_sh)
             send_to = e.email
@@ -5666,14 +5621,11 @@ def check_project_NCR(request):
 def ncr_create_view_history(request, ncr_no, rev_no,pageType):
     print('START : ncr_create_view_history')
 
-
     template_name = 'NCRMgmntSystem/ncr_create_history.html'
-    n = None
-    
+    n = None    
     nc_conformed_by_name = ''    
     ic_approve_by_name = ''   
     rca_approve_by_name = ''
-
     ca_checked_by_sh_name = '' 
     ra_check_by_sh_name = ''            
     ic_incharge_name = ''
@@ -5682,10 +5634,6 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
     ca_approved_by_mgr_name = ''
     se_check_by_mgr_name = ''
     se_check_by_qa_name = ''
-          
-
-
-
     
     deny_reasonA = ''
     deny_reasonB = ''
@@ -5707,7 +5655,6 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
     isSH = False
     isGrpMgr = False
     isAdmin = False
-    
     
     if "logged_user_chapa_no" in request.session:
         logged = True
@@ -5744,14 +5691,10 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
             c.execute(sqlStmt)
             x = namedtuplefetchall(c)
             for n in x:
-                print(n.ncr_no)
-                
-            
+                print(n.ncr_no)     
     except:
         print("Error")
                     
-
-        
     ncr_issue_date = n.ncr_issue_date
     nc_conformed_date = n.nc_conformed_date
     ic_create_date = n.ic_create_date

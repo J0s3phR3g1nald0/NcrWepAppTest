@@ -12,18 +12,11 @@
   
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.7/dist/css/bootstrap.min.css' %}">
-  
 
-
-  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
   <script src="{% static 'js/jquery-1.8.3.js' %}"> </script>
-  
-  
+    
   <!--<script src="{% static 'js/bootstrap.js' %}"> </script>-->
-
-
-
-  
   
   <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/css/bootstrap-datepicker3.min.css"> -->
   <!--<script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.5.0/js/bootstrap-datepicker.min.js"></script>  -->
@@ -1080,7 +1073,8 @@
 
 <div id="cancelNCRmodalDenied" class="modal fade">
 	<div class="modal-dialog">
-		<div class="modal-content">
+		<div
+     class="modal-content">
 			<div class="modal-header flex-column">
 				<div class="icon-box">
 					<i class="material-icons">&#xE5CD;</i>
@@ -1164,9 +1158,6 @@
       </button>
       <!-- Start modifying for additional request Edric Marinas 2024/04/04 -->
       
-    
-    
-
     {% if a.phase == 'H' and data.status != '7' %}
         <button type="button" class="btn btn-primary active save-btn" id="SHdenyReason" >
           Cancel Request Denied
@@ -1318,7 +1309,7 @@
       {% else %}    
           <input type="radio" name="optionsRadiosSourceManagementAction" id="optionsRadiosSourceManagementAction" value="4" disabled>
       {% endif %}
-      <label for="optionsRadiosSourceManagementAction">Management Action</label>&nbsp;&nbsp;&nbsp;&nbsp;
+      <label for="optionsRadiosSourceManagementAction">Management Review</label>&nbsp;&nbsp;&nbsp;&nbsp;
       
       {% if data.source == '5' %}
           <input type="radio" name="optionsRadiosSourceOthers" id="optionsRadiosSourceOthers" value="5" checked disabled>          
@@ -2820,12 +2811,12 @@
                 $("#is_D_on_edit_mode").val("1");           
             
             } else if (selected_ra_action_effective_value == '1') {
-                <!-- E --> 
+                //-- E  
                 $("#ra_followup_date").attr("disabled", true);    
                 $("#ra_followup_date").val("");
                 $("#ra_followup_date_picker").attr("disabled", true);   
             
-                <!-- F --> 
+                //-- F  
                 $("#se_description").attr("disabled", false);
                 $("#se_ro_updated_0").attr("disabled", false);
                 $("#se_ro_updated_1").attr("disabled", false);

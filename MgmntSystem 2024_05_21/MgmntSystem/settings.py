@@ -90,28 +90,40 @@ WSGI_APPLICATION = 'MgmntSystem.wsgi.application'
 #}
 
 #overtime system test DB
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ot',
+        'USER': 'otuser02',
+        'PASSWORD': 'otuser02',
+        'HOST': '10.2.1.18',
+        'PORT': '3306'
+    }
+}
+
+#overtime system test DB 2
 #DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.mysql',
 #        'NAME': 'ot',
 #        'USER': 'otuser02',
 #        'PASSWORD': 'otuser02',
-#        'HOST': '10.2.1.18',
+#        'HOST': 'ncrwepapptest.sdmi.shi.co.jp',
 #        'PORT': '3306'
 #    }
 #}
 
 #production DB
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ot',
-        'USER': 'sdmi',
-        'PASSWORD': 'sdmi',
-        'HOST': '10.2.1.147',
-        'PORT': '3306'
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'ot',
+#        'USER': 'sdmi',
+#        'PASSWORD': 'sdmi',
+#        'HOST': '10.2.1.147',
+#        'PORT': '3306'
+#    }
+#}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

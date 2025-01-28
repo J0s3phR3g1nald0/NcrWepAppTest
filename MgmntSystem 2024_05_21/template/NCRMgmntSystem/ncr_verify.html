@@ -1575,7 +1575,7 @@
         }
 
 
-        else{ <!-- if 'reason of deny' is not empty -->
+        else{ // if 'reason of deny' is not empty 
             var contains_spaces_only = true;
              for(a = 0; a < reason.length ;a++){
                  if(reason[a] != " "){
@@ -1588,7 +1588,7 @@
               if( contains_spaces_only == false){
 
 
-                  $("#mDeny").removeAttr("type").attr("type","submit"); <!--  it will change its button type into submit  -->
+                  $("#mDeny").removeAttr("type").attr("type","submit"); //  it will change its button type into submit  
                  // making it submit button will let it proceed to the target 'action' of <form> syntax-->
               }
               else{
@@ -1598,7 +1598,7 @@
 
         }
     });
-    <!-- error message for clicking save while it's 'button' type -->
+    // error message for clicking save while it's 'button' type -->
     $("#mDeny").click(function(){
 
             if(this.type == "button"){
@@ -1615,10 +1615,8 @@
  
  
  
-<!-- 2021.05.20 modal start -->
-    <!-- denyA1 -->
-    
-    <!--
+// 2021.05.20 modal start 
+    // denyA1 
     $("#denyA1").click(function () {
         document.getElementById("mDenyA1").disabled = true;
         document.getElementById("reasonA1").addEventListener("keyup", enableDenyA1);
@@ -1626,7 +1624,7 @@
     function enableDenyA1() {
         document.getElementById("mDenyA1").disabled = false;
     }
-    <!-- denyB1 -->
+    // denyB1 
     $("#denyB1").click(function () {
         document.getElementById("mDenyB1").disabled = true;
         document.getElementById("reasonB1").addEventListener("keyup", enableDenyB1);
@@ -1634,7 +1632,7 @@
     function enableDenyB1() {
         document.getElementById("mDenyB1").disabled = false;
     }
-    <!-- denyC1 -->
+    // denyC1 
     $("#denyC1").click(function () {
         document.getElementById("mDenyC1").disabled = true;
         document.getElementById("reasonC1").addEventListener("keyup", enableDenyC1);
@@ -1642,7 +1640,7 @@
     function enableDenyC1() {
         document.getElementById("mDenyC1").disabled = false;
     }
-    <!-- denyD -->
+    // denyD 
     $("#denyD").click(function () {
         document.getElementById("mDenyD1").disabled = true;
         document.getElementById("reasonD1").addEventListener("keyup", enableDenyD);
@@ -1650,7 +1648,7 @@
     function enableDenyD() {
         document.getElementById("mDenyD1").disabled = false;
     }
-    <!-- denyD1 -->
+    // denyD1 
     $("#denyD1").click(function () {
         document.getElementById("mDenyD1").disabled = true;
         document.getElementById("reasonD1").addEventListener("keyup", enableDenyD);
@@ -1658,7 +1656,7 @@
     function enableDenyD() {
         document.getElementById("mDenyD1").disabled = false;
     }
-    <!-- denyC2D2 -->
+    // denyC2D2 
     $("#denyC2D2").click(function () {
         document.getElementById("mDenyC2D2").disabled = true;
         document.getElementById("reasonC2").addEventListener("keyup", enableDenyC2D2);
@@ -1667,7 +1665,7 @@
     function enableDenyC2D2() {
         document.getElementById("mDenyC2D2").disabled = false;
     }
-    <!-- denyE -->
+    // denyE 
     $("#denyE").click(function () {
         document.getElementById("mDenyE1F1").disabled = true;
         document.getElementById("reasonE1").addEventListener("keyup", enableDenyE1F1);
@@ -1676,7 +1674,7 @@
     function enableDenyE1F1() {
         document.getElementById("mDenyE1F1").disabled = false;
     }    
-    <!-- denE2F2 -->
+    // denE2F2 
     $("#denyE2F2").click(function () {
         document.getElementById("mDenyE2F2").disabled = true;
         document.getElementById("reasonE2").addEventListener("keyup", enableDenyE2F2);
@@ -1685,7 +1683,7 @@
     function enableDenyE2F2() {
         document.getElementById("mDenyE2F2").disabled = false;
     }      
-    <!-- denyE3F3 -->
+    // denyE3F3 
     $("#denyE3F3").click(function () {
         document.getElementById("mDenyE3F3").disabled = true;
         document.getElementById("reasonE3").addEventListener("keyup", enableDenyE2F3);
@@ -1695,7 +1693,7 @@
         document.getElementById("mDenyE3F3").disabled = false;
     }  
         
-    <!-- clear when CANCEL button click -->
+    // clear when CANCEL button click 
     $("#mCancelBtnA1").click(function () {
         $("#mDenyA1").attr("disabled", "disabled");
         document.getElementById("reasonA1").value = ""
@@ -1732,8 +1730,8 @@
         document.getElementById("reasonE3").value = ""
         document.getElementById("reasonF3").value = ""
     }); 
-    -->    
-<!-- 2021.05.20 modal end -->    
+    //    
+// 2021.05.20 modal end -->    
 
 
 
