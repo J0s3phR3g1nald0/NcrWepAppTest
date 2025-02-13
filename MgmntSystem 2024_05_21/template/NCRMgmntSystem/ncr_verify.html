@@ -1541,7 +1541,7 @@
     });
     
     $("#btnReset").click(function () {    
-        $("#ncrVerifyForm").attr("action", "{% url 'NCRMgmntSystem:ncr_verify_view' ncrDetailMstr.ncr_no 'check_phase' 'None' 'None' from_email_id %}");  
+        $("#ncrVerifyForm").attr("action", "{% url 'NCRMgmntSystem:ncr_verify_view' ncrDetailMstr.ncr_no check_phase 'None' 'None' from_email_id %}");  
         $("#ncrVerifyForm").submit(); 
     });
     
