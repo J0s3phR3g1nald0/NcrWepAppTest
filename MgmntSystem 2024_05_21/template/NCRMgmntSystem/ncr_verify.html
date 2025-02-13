@@ -6,15 +6,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">-->
   <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/dist/css/bootstrap.min.css' %}">
-  
-  
-  
-  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
   <script src="{% static 'js/jquery-3.5.1.js' %}"> </script>
-  
-  <!--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>-->
   <script src="{% static 'js/bootstrap.min.js' %}"> </script>
   <style>
   .fakeimg {
@@ -25,30 +18,27 @@
   </style>
   <style type="text/css">
   
-  .loader{
+    .loader{
+      right: 0;
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid #3498db;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
 
-    right: 0;
-    border: 6px solid #f3f3f3;
-    border-top: 6px solid #3498db;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
+      -webkit-animation: spin 2s linear infinite;
+      animation: spin 2s linear infinite;
+    }
 
-    -webkit-animation: spin 2s linear infinite;
-    animation: spin 2s linear infinite;
-  }
-  @-webkit-keyframes spin{
-    0% { -webkit-transform: rotate(0deg);}
-    100% { -webkit-transform: rotate(360deg);}
-  }
-  @keyframes spin {
-    0%{transform:rotate(0deg);}
-    100% { -webkit-transform: rotate(360deg);}
-  }
+    @-webkit-keyframes spin{
+      0% { -webkit-transform: rotate(0deg);}
+      100% { -webkit-transform: rotate(360deg);}
+    }
   
-  
-  
-  
+    @keyframes spin {
+      0%{transform:rotate(0deg);}
+      100% { -webkit-transform: rotate(360deg);}
+    }
     .custom-radio-list {
         list-style-type: none;
         padding: 0;
@@ -79,31 +69,21 @@
    
     .sdmifooter {border-top:1px solid rgba(0,0,0,0.2);width:100%;bottom:0;position:fixed;padding-top:10px;padding-bottom:10px;margin-bottom:10px;color:inherit;background-color:#eee}
     
-    
     .glyphicon.glyphicon-ok {font-size: 25px;}
    
     .glyphicon.glyphicon-remove {font-size: 25px;}
-        
         
     #the-count {
         float: right;
         padding: 0.1rem 0 0 0;
         font-size: 0.975rem;
     }    
-
-
-
-
-
-
-
-
   </style>
   
   <script type="text/javascript">
-      
+
       function validateAccept(process) {
-          var ncrNo = $('#ncrNo').val();  // get the selected section ID from the HTML input
+         var ncrNo = $('#ncrNo').val();  // get the selected section ID from the HTML input
           var hidden_update_date = $('#hidden_update_date').val();          
           
           var url = $("#ncrVerifyForm").attr("get-latest-update-date-url");  
@@ -140,7 +120,7 @@
                       }                                        
                   } else {                  
                       $("#success_msg").html("");                   
-                      $("#err_msg").html("<h3><font color='red'>At " + data.latest_update_date + ", this NCR was already updated by " + data.latest_update_by + "<br>Click Reset button to acquire latest status.</font></h3>");
+                      $("#err_msg").html("<h3><font color='red'>At " + data.latest_update_date + ", this NCR was already updated by " + data.latest_update_by + "<br>Click <b>Display Latest Info</b> button to acquire NCR's latest information from database.</font></h3>");
                   }
               }
           });        
@@ -150,7 +130,6 @@
           var ncrNo = $('#ncrNo').val();  // get the selected section ID from the HTML input
           var hidden_update_date = $('#hidden_update_date').val();          
           var url = $("#ncrVerifyForm").attr("get-latest-update-date-url");  
-          
           
           $.ajax({ 
               url: url, 
@@ -163,17 +142,15 @@
                        $("#hidden_process").val(process);
                        $("#denyReason").modal("show");
                        
+                       //START: Delete reginaldo-jsp 2025.02.12
                        //<!--Start modify for additional request Edric 2024/04/04 -->
-                       if($("#hidden_process").val() == "denyCancelRequest"){
-                           
-                           var button = document.getElementById("mCancelBtnCancel");
-                           button.click();
-
-                          
-                           
-                       }
-     
-                        //<!--Start modify for additional request Edric 2024/04/04 -->
+                       //if($("#hidden_process").val() == "denyCancelRequest"){
+                       //    
+                       //    var button = document.getElementById("mCancelBtnCancel");
+                       //    button.click();
+                       //}
+                      //<!--Start modify for additional request Edric 2024/04/04 -->
+                      //END: Delete reginaldo-jsp 2025.02.12
                        
                   } else {                  
                       $("#success_msg").html("");                   
@@ -181,10 +158,6 @@
                   }
               }
           });
-          
-          
-          
-                  
       }
                 
       function validateInputB() {
@@ -260,18 +233,13 @@
           }    
       }   
 
-
-
-
-
       function cancelNCR_modal_func(a){
           $("#cancelNCR_modal").modal("show");
           if( a == "modal"){
-          var button = document.getElementById("mCancelBtnCancel");
-          button.click();
+            var button = document.getElementById("mCancelBtnCancel");
+            button.click();
           }
       }
-
 
   </script>
     
@@ -279,7 +247,6 @@
 
 <!--<body>-->
 <body onload="init_screen()">
-
 
 <!--
 <div class="jumbotron text-center" style="margin-bottom:0">
@@ -365,25 +332,48 @@
   <div class="row">
     <div class="col-sm-9">
       <button type="button" class="btn btn-primary active save-btn" id="btnReset">
-        <span class="glyphicon glyphicon-refresh"></span> Reset
+        <!--START: Modify reginaldo-jsp 2025.01.30-->
+        <!--<span class="glyphicon glyphicon-refresh"></span> Reset-->
+        <span class="glyphicon glyphicon-refresh"></span> Display Latest Info
+        <!--END: Modify reginaldo-jsp 2025.01.30-->
       </button>     
 
+      <!--
       {% if ncrDetailMstr.status == '7' and a.phase == 'G'%}
-      <button type="button" class="btn btn-primary active save-btn" id="seeCancelReason">
-        View Cancel Request Reason
-      </button>       
+        <button type="button" class="btn btn-primary active save-btn" id="seeCancelReason">
+          View Cancel Request Reason
+        </button>
        
-       {% elif ncrDetailMstr.status != '2' and ncrDetailMstr.status != '5'  %}
-       <button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="button" onclick="cancelNCR_modal_func(this.value)">
+      {% elif ncrDetailMstr.status != '2' and ncrDetailMstr.status != '5'  %} 
+        <button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="button" onclick="cancelNCR_modal_func(this.value)">
          Cancel NCR
-       </button>  
-       {% endif %} 
+        </button>  
+      {% endif %} 
+      -->
+
+      <!--START: Add reginaldo-jsp 2025.02.07-->
+      {% if ncrDetailMstr.status == '7' and a.phase == 'G'%}
+        <button type="button" class="btn btn-primary active save-btn" id="seeCancelReason">
+          View Cancel Request Reason
+        </button>
+      {% endif %} 
+
+      {%if show_cancel_ncr_btn and ncrDetailMstr.status != '7'%} 
+        <button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="button" onclick="cancelNCR_modal_func(this.value)">
+          Cancel NCR
+        </button>  
+      {% endif %} 
+
+      {%if show_req_cancel_ncr_btn and ncrDetailMstr.status != '7'%} 
+        <button type="button" class="btn btn-primary active save-btn" id="btnConfirmRequestToCancelNCR" >
+          Request To Cancel NCR
+        </button> 
+      {% endif %} 
+      <!--END: Add reginaldo-jsp 2025.02.07-->
+
     </div>
-    
-    
     <div class="col-sm-3">
 
-    
     {% if ncrDetailMstr.close_date|date:"Y-m-d" == '' %}
       {% if ncrDetailMstr.deadline != None %}
         <h4><p class="text-right">Deadline: {{ncrDetailMstr.deadline|date:'d F o'}}
@@ -413,7 +403,6 @@
     </div>             
   </div>
   
-  
   <div class="row" style="background-color:#C0C0C0;">
     &nbsp;
     <div class="col-sm-6">
@@ -423,7 +412,7 @@
     {% if ncr_no_size == 'S' %}
       <strong><h2><small>Rec No:</small>{{ncrDetailMstr.ncr_no}}</h1></strong>
     {%else%}
-      <strong><h4><small>Rec No:</small>{{ncrDetailMstr.ncr_no}}</h4></strong>
+      <strong><h3><small>Rec No:</small>{{ncrDetailMstr.ncr_no}}</h3></strong>
     {%endif%}  
       <center><h5>YYYY-MM-DD-Section-Project-Serial</h5></center>  
     </div>
@@ -500,8 +489,6 @@
         Staff:&nbsp;<input type="textbox" class="form-control" id="nc_discovered_by_read_only" value="{{nc_discovered_by}}" disabled/>
         <!-- 2024/05/08 -->
         Email:&nbsp;<input type="textbox" class="form-control" id="discovered_by_email_read_only" value="{{nc_discovered_by_email}}" disabled>
-        
-        
       </div> 
       <div class="row">
         <strong>Confirmed by: </strong>                     
@@ -517,7 +504,6 @@
         {% if check_phase != '0' and from_email_id == ncrDetailMstr.nc_conformed_by and ncrDetailMstr.ic_create_date|date:"Y-m-d" == '' %}
           {% if ncrDetailMstr.nc_conforme_status != '1' %}
 
-
           <!--2024/05/08 Edric 
           <input type="button" class="btn btn-success" name="acceptA" value="Accept" id="acceptA" onclick="javascript:validateAccept('acceptA1');">
           -->
@@ -527,7 +513,6 @@
             <!--{%else%} -->
                 <input type="button" class="btn btn-success" name="acceptA" value="Accept" id="acceptA" onclick="javascript:validateAccept('acceptA1');">  
              <!--{%endif%}-->
-
 
           {% else %} 
             <input type="button" class="btn btn-success" name="acceptA" value="Accept" disabled>     
@@ -913,17 +898,12 @@
         
         if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr
         -->
-        
-
         {% if check_phase != '0' and from_email_id == ncrDetailMstr.se_check_by_mgr and ncrDetailMstr.close_date|date:"Y-m-d" == '' and ncrDetailMstr.se_description != None and ncrDetailMstr.ra_action_effective != '2' %}
-        
         <!-- End modify due to bug Edric 2024/03/13 -->
-        
-   
-          {% if ncrDetailMstr.ra_check_date_by_sh|date:"Y-m-d" == ''  %}
+
+        {% if ncrDetailMstr.ra_check_date_by_sh|date:"Y-m-d" == ''  %}
             <input type="button" class="btn btn-success" name="acceptE2F2" value="Accept" disabled/>
             <button type="button" class="btn btn-danger" name="acceptE2F2" value="denyD2" disabled>Deny</button>
-          
           
           {% elif ncrDetailMstr.se_description == ''%}
           
@@ -1012,13 +992,34 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-warning" id="mCancelBtn" data-dismiss="modal">Cancel</button>
                 
-                
     			<button type="button" class="btn btn-success" id="mDeny" >Save</button>
 						
             </div>            
         </div>
     </div>
 </div>
+
+<!-- START: Added reginaldo-jsp 2025.02.07 -->
+<div class="modal fade" role="dialog" id="confirm_request_to_cancel_ncr">
+  <div class="modal-dialog modal-md">
+      <div class="modal-content">
+          <div class="modal-header">
+              <center><h3 class="modal-title"><font color="blue">Request To Cancel NCR</font></h3>
+                  <h5>Input reason then click on [<b>Request To Cancel NCR</b>] button<br> to send cancellation request for this NCR,<br> otherwise click [<b>Close</b>] button to close this confirmation window</h5>
+              </center>
+          </div>
+          <div class="modal-body">
+              <label for="reason" class="col-form-label">Reason of Cancellation:</label><br>
+              <textarea class="form-control" rows="7" cols="75" id="cancellationReason" name="cancellationReason"></textarea >
+          </div>            
+          <div class="modal-footer">
+              <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
+              <input type="button" class="btn btn-success" name="btnProceedRequestToCancelNCR" value="Request To Cancel NCR" id="btnProceedRequestToCancelNCR" >
+          </div>            
+      </div>
+  </div>
+</div> 
+<!-- END: Added reginaldo-jsp 2025.02.07 -->
 
 
 
@@ -1049,6 +1050,29 @@
 </div>
 -->
 
+<div id="cancelNCRmodal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header flex-column">
+				<div class="icon-box">
+					<i class="material-icons">&#xE5CD;</i>
+				</div>						
+				<h4 class="modal-title w-100">Send cancel request to SH</h4>	
+				Changes wont be saved if you request for NCR cancellation                
+			</div>
+			<div class="modal-body">
+                <p>
+				   <label for="reason" class="col-form-label" id="reason">Reason/s:</label>
+				   <textarea  class="form-control"  rows="7" cols="75" id="cancelReason"></textarea>
+				</p>
+			</div>
+			<div class="modal-footer justify-content-center">
+				<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-success" id="cancelContinue" name="cancelContinue" value="cancelContinue" onclick="request_cancel()">Continue</button>
+			</div>
+		</div>
+	</div>
+</div> 
 
 <!-- Start adding for additional request Edric 2024/04/04 -->
 {%if ncrDetailMstr.status == '7'%}
@@ -1056,20 +1080,27 @@
     <div class="modal-dialog modal-md">
         <div class="modal-content">
             <div class="modal-header">
-                <center><h3 class="modal-title"><font color="blue">Cancellation Request</font></h3>
+                <center><h3 class="modal-title"><font color="blue">Request To Cancel NCR</font></h3>
                     <h5>This NCR was requested to be cancelled</h5>
                 </center>
             </div>
             <div class="modal-body">
-                
-
                 <label for="reason" class="col-form-label">Reason/s:</label><br>
                 <textarea class="form-control" rows="7" cols="75" disabled>{{a.reason}}</textarea >
             </div>            
             <div class="modal-footer">
                 <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
+
+                <!-- START: Modify reginaldo-jsp 2025.01.30 -->
+                <!-- 
                 <button type="button" id="" class="btn btn-danger" name="" value="" onclick="javascript:validateDeny('denyCancelRequest');" >Deny</button>
-                <button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="modal" onclick="cancelNCR_modal_func(this.value)">Cancel NCR</button>     
+                <button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="modal" onclick="cancelNCR_modal_func(this.value)">Cancel NCR</button>    
+                -->
+                {%if show_cancel_ncr_btn %} 
+                    <button type="button" id="btnDenyCancelNCR" class="btn btn-danger" name="" value="">Deny</button>
+                    <button type="button" class="btn btn-primary active save-btn" id="btnAcceptCancelNCR" value="modal">Cancel NCR</button>    
+                {% endif %}   
+                <!-- END: Modify reginaldo-jsp 2025.01.30 -->
             </div>            
         </div>
     </div>
@@ -1081,7 +1112,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <center><h3 class="modal-title"><font color="blue">Cancel NCR</font></h3>
-                    <h5>Do you want to continue?</h5>
+                  <h5>Input reason then click on <b>Cancel NCR</b> button to cancel this NCR,<br> otherwise click <b>Close</b> button</h5>
                 </center>
             </div>
             <div class="modal-body">
@@ -1091,21 +1122,13 @@
             </div>            
             <div class="modal-footer">
                 <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
-                <input type="button" class="btn btn-success" name="acceptA" value="Accept" id="acceptA" onclick="javascript:validateAccept('cancelNCRaccept');">
+                <!--<input type="button" class="btn btn-success" name="acceptA" value="Cancel NCR" id="acceptA" onclick="javascript:validateAccept('cancelNCRaccept');">-->
+                <input type="button" class="btn btn-success" name="acceptA" value="Cancel NCR" id="acceptA" onclick="javascript:validateAccept('cancelNCR');">
             </div>            
         </div>
     </div>
 </div>  
-
-
 <!-- End modifying for additional request Edric 2024/04/04 -->
-
-
-
-
-
-
-
 
 <!-- Start Modifying for Additional Requesst Edric Marinas 2024/02/27-->
 <div class="modal fade" role="dialog" id="ro_warning">
@@ -1125,10 +1148,6 @@
 </div>
 <!-- End Modifying for Additional Requesst Edric Marinas 2024/02/27-->
 
-
-
-
-
 <!-- Start Modifying for Improvement Edric Marinas 2024/03/07-->
 <div class="modal fade" role="dialog1" id="pleasaeWait">
     <div class="modal-dialog modal-md">
@@ -1146,16 +1165,6 @@
     </div>
 </div>
 <!-- End Modifying for Improvement Requesst Edric Marinas 2024/03/07-->
-
-
-
-
-
-
-
-
-
-
 
 <!--
 <div class="modal fade" role="dialog" id="denyReasonA1">
@@ -1394,8 +1403,9 @@
     {{form.hidden_process}}
     {{form.hidden_update_date}}
 
-
-
+    <!--START: Add reginaldo-jsp 2025.02.11-->
+    {{form.hidden_cancel_reason}}
+    <!--END: Add reginaldo-jsp 2025.02.11-->
     
 </form>
 <br><br><br>
@@ -1530,16 +1540,12 @@
         });
     });
     
-    
-    
-    
-    
     $("#btnReset").click(function () {    
         $("#ncrVerifyForm").attr("action", "{% url 'NCRMgmntSystem:ncr_verify_view' ncrDetailMstr.ncr_no 'check_phase' 'None' 'None' from_email_id %}");  
         $("#ncrVerifyForm").submit(); 
     });
     
-    function init_screen(){        
+    function init_screen() {        
         if( $('#ic_create_date').val() != ''){
             $("#id_ic_incharge").attr('readonly','readonly');        
         } else {
@@ -1547,16 +1553,11 @@
         }              
     }
 
-
-
-
     //<!-- Start adding for additional request Edric Marinas 2024/04/04 -->
-    $("#cancelRequest_modal").modal("show");
-
+    //$("#cancelRequest_modal").modal("show");
     $("#seeCancelReason").click(function(){
-        $("#cancelRequest_modal").modal("show");
+        $("#cancelRequest_modal").modal("show"); 
     })
-
     //<!-- End adding for additional request Edric Marinas 2024/04/04-->
 
     /*<!-- 2024/05/08
@@ -1566,14 +1567,12 @@
 
      //<!--Start adding for Improvement Edric Marinas 2024/02/20 -->
     $("#reason").keyup(function(){  
-
         var reason = document.getElementById("reason").value;
 
         if (reason === "" ){ //<!-- If 'reason for deny' is blank -->
             $("#mDeny").removeAttr("type").attr("type","button"); //<!-- Submit button will change its type into normal button -->
             //<!-- changing it to normal 'button' will make it useless and will not proceed to target 'action' from <form> syntax -->
         }
-
 
         else{ // if 'reason of deny' is not empty 
             var contains_spaces_only = true;
@@ -1586,18 +1585,15 @@
              }
 
               if( contains_spaces_only == false){
-
-
                   $("#mDeny").removeAttr("type").attr("type","submit"); //  it will change its button type into submit  
                  // making it submit button will let it proceed to the target 'action' of <form> syntax-->
               }
               else{
                   $("#mDeny").removeAttr("type").attr("type","button");
               }
-
-
         }
     });
+
     // error message for clicking save while it's 'button' type -->
     $("#mDeny").click(function(){
 
@@ -1798,19 +1794,42 @@ $("#CloseE3F3").click(function(){
 });                
 //<!-- End Modifying for Additional Requesst Edric Marinas 2024/02/27-->
 
+function cancelNCRmodal(){
+  var button = document.getElementById("cancel_button_modal");
+  button.click();
+  $("#cancelNCRmodal").modal("show");
+}
 
+  //START: reginaldo-jsp 2025.02.07 
+  $("#btnCancelNCR").click(function () {
+    //var requestCancellationReason = document.getElementById('requestCancellationReason').value; 
+    //$("#hidden_cancel_reason").val(requestCancellationReason);
+    $("#hidden_process").val("cancelNCR");
+    $("#ncrVerifyForm").submit();
+  });
 
+  $("#btnConfirmRequestToCancelNCR").click(function () {
+    $("#confirm_request_to_cancel_ncr").modal("show");   
+  });
 
+  $("#btnProceedRequestToCancelNCR").click(function () {
+    var cancellationReason = document.getElementById('cancellationReason').value; 
+    $("#hidden_cancel_reason").val(cancellationReason); 
+    $("#hidden_process").val("requestToCancelNCR");
+    $("#ncrVerifyForm").submit();
+  });
 
+  $("#btnDenyCancelNCR").click(function () {
+    $("#hidden_process").val("denyCancelRequest");
+    $("#ncrVerifyForm").submit();
+  });
 
-
-
-
-
-
-
-
-   
+  $("#btnAcceptCancelNCR").click(function () {
+    $("#hidden_process").val("cancelNCRaccept");
+    $("#ncrVerifyForm").submit();
+  });
+  
+  //END: reginaldo-jsp 2025.02.07
 </script>
 
 <!--<script type="text/javascript" src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.3/js/bootstrap.min.js'></script>-->

@@ -2,6 +2,7 @@ from django.shortcuts import render
 
 from .models import Employee, Rank, Dept
 from .models import NcrDetailMstr, NcrAdvUserTbl, Project, DenyReason
+
 from django.db import connection
 from collections import namedtuple
 from datetime import date
@@ -121,6 +122,9 @@ def login(request):
                 request.session["isGrpMgr"] = isGrpMgr
                 request.session["isQA"] = isQA
                 request.session["isAdmin"] = isAdmin
+
+                if "isSH" in request.session:    
+                    isSH = request.session["isSH"]
 
                 if isChecker or isSH or isGrpMgr:    
                     print('END: login')
@@ -917,8 +921,6 @@ def ncr_search_view(request):
         #deptVal = form.get("dept");
         #print("form.dept >>" + str(deptVal))
          
-        
-        
         # Added for additional request 
         #WHEN n.status = '7' THEN 'Cancel Request'
         
@@ -1307,11 +1309,10 @@ def ncr_create_view_upd(request, ncr_no, status):
     a = None
     
     try:
-        a =  DenyReason.objects.get(ncr_no=ncr_no,phase='H')
-
+        #a =  DenyReason.objects.get(ncr_no=ncr_no,phase='H')
+        a =  DenyReason.objects.get(ncr_no=ncr_no, phase='G')
     except:
         error_message = "Error"
-
     #End adding for additional request Edric Marinas 2024/04/04
     
     if "logged_user_chapa_no" in request.session:
@@ -1341,7 +1342,6 @@ def ncr_create_view_upd(request, ncr_no, status):
             name = n.nc_discovered_by.split(',')
             lastname = name[0]
             
-            
             try:
                 employee = Employee.objects.filter(lastname=lastname).count()
   
@@ -1358,8 +1358,6 @@ def ncr_create_view_upd(request, ncr_no, status):
             except:
                 print("No email record")
             #End    
-                
-                
                 
             ncr_issue_date = n.ncr_issue_date
             nc_conformed_date = n.nc_conformed_date
@@ -1567,7 +1565,6 @@ def ncr_create_view_upd(request, ncr_no, status):
             if n.se_check_by_mgr in [None, ''] and n.ca_approve_by_mgr_status == '1':
                 se_check_by_mgr = n.ca_approved_by_mgr    
             
-            
             #2024/05/08
             nowx = datetime.datetime.now()
             date_time = nowx.strftime("%Y-%m-%d")
@@ -1677,8 +1674,8 @@ def ncr_create_view_upd(request, ncr_no, status):
                     'is_E_on_edit_mode' : 'X',
                     'is_F_on_edit_mode' : 'X',
                     'ra_check_by_staff_name' : ra_check_by_staff_name,
-                    
-                    })                     
+                    })         
+                        
             set_dropdowns(form, n.dept.id)
             
         except NcrDetailMstr.DoesNotExist:
@@ -1711,14 +1708,61 @@ def ncr_create_view_upd(request, ncr_no, status):
         except:
             print("No message needed")
             #message = 'NCR data was succesfully updated in database and email notification was sent.'
-            
     
     ncr_no_size = 'S'
     if len(ncr_no) > 25:     
         ncr_no_size = 'L'
     
-    context = {
-            
+    #START: Added reginaldo-jsp 2025.02.06    
+    show_cancel_ncr_btn = False #do not show CANCEL NCR button
+    show_req_cancel_ncr_btn = False #do not show REQUEST TO CANCEL NCR button
+    issued_to_sh = ''
+    issued_from_dept = ''
+        
+    if n.status not in ('2', '5'):
+        try:
+            #SELECT * FROM `rank` WHERE chapano = '?'
+            ex = Rank.objects.get(chapano=n.ncr_issue_by)
+            issued_from_dept = ex.deptid
+        except Rank.DoesNotExist:
+            error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+        try:
+            #Get SH of the section that this NCR was issued to 
+            #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+            ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+            issued_to_sh = ex.chapano
+        except Rank.DoesNotExist:
+            error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+
+        if (logged_user_chapa_no == issued_to_sh and issued_from_dept == n.dept_id) or (logged_user_chapa_no == n.nc_conformed_by and issued_from_dept == n.dept_id) or (logged_user_chapa_no == n.ncr_issue_by and issued_from_dept != n.dept_id):
+            show_cancel_ncr_btn = True # show CANCEL NCR button  
+        
+        else:
+            if (logged_user_chapa_no == issued_to_sh or logged_user_chapa_no == n.nc_conformed_by) and issued_from_dept != n.dept_id:
+                show_req_cancel_ncr_btn = True # show REQUEST TO CANCEL NCR button 
+                
+            else:
+                assigned_to_chapano = ''
+
+                if n.ra_check_by_staff not in ('', None):
+                    assigned_to_chapano = n.ra_check_by_staff 
+                elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+                    assigned_to_chapano = n.ca_create_by  
+                elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+                    assigned_to_chapano = n.rca_incharge
+                elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+                    assigned_to_chapano = n.ic_incharge
+                #elif n.nc_conformed_by not in ('', None) and n.ic_incharge in ('', None):
+                #    assigned_to_chapano =n.nc_conformed_by    
+                elif n.ncr_issue_by not in ('', None): 
+                    assigned_to_chapano = n.ncr_issue_by   
+         
+                if logged_user_chapa_no ==  assigned_to_chapano:
+                    show_req_cancel_ncr_btn = True # show REQUEST TO CANCEL NCR button
+        #END: Added reginaldo-jsp 2025.02.06
+
+    context = {            
                #2024/05/08
                'nc_discovered_by_email': n.nc_discovered_by_email,
                'nc_discovered_by' : n.nc_discovered_by,
@@ -1758,14 +1802,17 @@ def ncr_create_view_upd(request, ncr_no, status):
                
                #Start adding for additional request Edric 2024/03/14
                'hidden_update_user_id1' : n.update_user_id,
-
-               "a" : a,
+               'a' : a,
                #End adding for additional request Edric 2024/04/04
-               
                
                'logged_username' : logged_username,
                'ncr_no_size' : ncr_no_size,
                'logged_user_chapa_no' : logged_user_chapa_no,
+
+               #START: Added reginaldo-jsp 2025.02.06
+               'show_cancel_ncr_btn' : show_cancel_ncr_btn,
+               'show_req_cancel_ncr_btn' : show_req_cancel_ncr_btn
+               #END: Added reginaldo-jsp 2025.02.06
                }    
     
     print('END : ncr_create_view_upd')
@@ -1805,13 +1852,6 @@ def ncr_verify_list_view(request):
         return render(request, 'NCRMgmntSystem/login.html', context)
     #end adding Edric Marinas 2024/03/11
 
-
-
-
-
-
-
-
     #START MODIFYING FOR IMPROVEMENT Edric 2024/04/23
     #sqlStmt = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
     #sqlStmt = sqlStmt + "SELECT n.ncr_no as ncr_no, n.nc_detail_description, n.deadline, CONCAT(e.lastName, ', ', e.firstName, ' ', e.middleName) as last_update_by_name, n.update_date "
@@ -1826,7 +1866,6 @@ def ncr_verify_list_view(request):
     #sqlStmt = sqlStmt + "(n.se_check_by_mgr = '" + logged_user_chapa_no + "' and n.se_check_date_by_mgr IS NULL ) OR "
     #sqlStmt = sqlStmt + "(n.se_check_by_qa = '" + logged_user_chapa_no + "' and n.se_check_date_by_qa IS NULL ) )"
     
-  
     #Set SQL statement
     #sqlStmt = "SELECT a.*, @rownum:=(@rownum+1) AS row_num from ("
     #sqlStmt = sqlStmt + "SELECT n.ncr_no as ncr_no, n.nc_detail_description, n.deadline, CONCAT(e.lastName, ', ', e.firstName, ' ', e.middleName) as last_update_by_name, n.update_date "
@@ -2249,7 +2288,6 @@ def is_error_on_required_B(request, form):
     if ic_incharge == '':
         has_error = True
         form.fields['ic_incharge'].widget.attrs['class'] = "form-control error"      
-        
     
     ic_approve_by = form.data.get('ic_approve_by')
     if ic_approve_by == '':
@@ -2522,15 +2560,7 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
     isAdmin = False
         
     deptId = ''
-    
-    
-
-    
     current_datetime = datetime.datetime.now()
-    
-    
-    
-    
     
     if 'logged_user_chapa_no' in request.session:
         logged_user_chapa_no = request.session['logged_user_chapa_no']
@@ -2683,7 +2713,63 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
         ncr_no_size = 'S'
         if len(n.ncr_no) > 25:     
             ncr_no_size = 'L'
+
+        #START: Added reginaldo-jsp 2025.01.30 
+        #if  NCR's status is 2(Cancelled) or is 5(CLOSED), 
+        # set check_phase = 0, so that ACCEPT and DENY button in screen(ncr_verify.html) will not be displayed  
+        if n.status in ('2', '5') :
+            check_phase = '0'     
+        #END: Added reginaldo-jsp 2025.01.30 
+            
+        #START: Added reginaldo-jsp 2025.02.06    
+        show_cancel_ncr_btn = False #do not show CANCEL NCR button
+        show_req_cancel_ncr_btn = False #do not show REQUEST TO CANCEL NCR button
+        issued_to_sh = ''
+        issued_from_dept = ''
+        #
+        if n.status not in ('2', '5'):
+            try:
+                #SELECT * FROM `rank` WHERE chapano = '?'
+                ex = Rank.objects.get(chapano=n.ncr_issue_by)
+                issued_from_dept = ex.deptid
+            except Rank.DoesNotExist:
+                error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+            try:
+                #Get SH of the section that this NCR was issued to 
+                #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+                ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+                issued_to_sh = ex.chapano
+            except Rank.DoesNotExist:
+                error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+          
+            if (logged_user_chapa_no == issued_to_sh and issued_from_dept == n.dept_id) or (logged_user_chapa_no == n.nc_conformed_by and issued_from_dept == n.dept_id) or (logged_user_chapa_no == n.ncr_issue_by and issued_from_dept != n.dept_id): 
+                show_cancel_ncr_btn = True # show CANCEL NCR button  
         
+            else:
+                if (logged_user_chapa_no == issued_to_sh or logged_user_chapa_no == n.nc_conformed_by) and issued_from_dept != n.dept_id:
+                    show_req_cancel_ncr_btn = True # show REQUEST TO CANCEL NCR button 
+                else:
+                    assigned_to_chapano = ''
+
+                    if n.ra_check_by_staff not in ('', None):
+                        assigned_to_chapano = n.ra_check_by_staff 
+                    elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+                        assigned_to_chapano = n.ca_create_by  
+                    elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+                        assigned_to_chapano = n.rca_incharge
+                    elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+                        assigned_to_chapano = n.ic_incharge
+                    elif n.nc_conformed_by not in ('', None) and n.ic_incharge in ('', None):
+                        assigned_to_chapano =n.nc_conformed_by    
+                    elif n.ncr_issue_by not in ('', None): 
+                        assigned_to_chapano = n.ncr_issue_by   
+         
+                    if logged_user_chapa_no ==  assigned_to_chapano:
+                        show_req_cancel_ncr_btn = True # show REQUEST TO CANCEL NCR button
+        
+        #END: Added reginaldo-jsp 2025.02.06
+
         context = {
                    #2024/05/08
                    'nc_discovered_by': n.nc_discovered_by,
@@ -2717,8 +2803,13 @@ def ncr_verify_view(request, ncr_no, check_phase, message, error_message, from_e
                    'hidden_update_user_id1' : n.update_user_id,
                    #End adding for additional request Edric 2024/03/14
                    
-                   
-                   'logged_user_chapa_no' : logged_user_chapa_no,                   
+                   'logged_user_chapa_no' : logged_user_chapa_no,     
+
+                   #START: Added reginaldo-jsp 2025.02.06 
+                   'show_cancel_ncr_btn' : show_cancel_ncr_btn,    
+                   'show_req_cancel_ncr_btn' : show_req_cancel_ncr_btn, 
+                   #END: Added reginaldo-jsp 2025.02.06 
+                             
                    }
     
         print('END : ncr_verify_view')
@@ -2741,28 +2832,28 @@ def ncr_verify_accept(request):
     from_email_id = request.POST.get('from_email_id', None)     
     hidden_process = request.POST.get('hidden_process', None)
     reason = request.POST.get('reason', None)
-    reasonA1 = request.POST.get('reasonA1', None)
-    reasonB1 = request.POST.get('reasonB1', None)
-    reasonC1 = request.POST.get('reasonC1', None)
-    reasonD1 = request.POST.get('reasonD1', None)
-    reasonC2 = request.POST.get('reasonC2D2', None)
-    reasonE1 = request.POST.get('reasonE1F1', None)
-    reasonE2 = request.POST.get('reasonE2F2', None)
-    reasonE3 = request.POST.get('reasonE3F3', None)
+    #reasonA1 = request.POST.get('reasonA1', None)
+    #reasonB1 = request.POST.get('reasonB1', None)
+    #reasonC1 = request.POST.get('reasonC1', None)
+    #reasonD1 = request.POST.get('reasonD1', None)
+    #reasonC2 = request.POST.get('reasonC2D2', None)
+    #reasonE1 = request.POST.get('reasonE1F1', None)
+    #reasonE2 = request.POST.get('reasonE2F2', None)
+    #reasonE3 = request.POST.get('reasonE3F3', None)
     process = request.POST.get('process', None)
-    
     success_message = ''
     error_message = ''
     db_update_success = False
     send_email_success = False
     logged_user_chapa_no = ''
     n = None
-
-    a = None
-
+    #a = None
     current_datetime = datetime.datetime.now()
-    
     cancelMessage = request.POST.get('cancelMessage', None)
+
+    #START: Add reginaldo-jsp 2025.02.11 
+    hidden_cancel_reason = request.POST.get('hidden_cancel_reason', None)
+    #END: Add reginaldo-jsp 2025.02.11
     
     try:
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)   
@@ -2786,39 +2877,44 @@ def ncr_verify_accept(request):
     
     #Start adding for additional request Edric Marinas 2024/04/04
     if hidden_process == 'denyCancelRequest': 
+        requestingPerson = ''
+
         try:
-            DenyReason.objects.get(ncr_no=ncr_no,phase='G')
+            d = DenyReason.objects.get(ncr_no=ncr_no, phase='G') 
+            requestingPerson = d.corrected_by
+
             try:
-                cursor=connection.cursor()
-                cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(),reason = '"+reason+"',denied_by = '"+request.session["logged_user_chapa_no"] +"', phase = 'H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='G' ")
+                cursor = connection.cursor()
+                cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(), denied_by = '" + logged_user_chapa_no + "', phase = 'H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='G' ")
                 success_message = "Deny cancel request success";
             except DatabaseError:
                 print('Error occured while Denying NCR. (NCR#' + ncr_no +')')              
             finally:    
                 cursor.close
             
-            
             if success_message not in (''):
-                sendmail_NCR_cancel_request('0', n)
-                #sendmail_NCR_cancel_request('0',n)
+                sendmail_ncr_req_cancel_denied(n, logged_user_chapa_no, requestingPerson)
+                send_email_success = True
                 n.status = '4'
                 n.save()
-                
+                db_update_success = True
         except:
             error_message = 'No record'
-
     
     if hidden_process == 'cancelNCRaccept':
+        requestingPerson = ''
         try:
             try:
-                DenyReason.objects.get(ncr_no=ncr_no,phase='G')
+                d = DenyReason.objects.get(ncr_no=ncr_no,phase='G')
                 p = 'G'
+                requestingPerson = d.corrected_by
             except:
-                DenyReason.objects.get(ncr_no=ncr_no,phase='H')
+                d = DenyReason.objects.get(ncr_no=ncr_no,phase='H')
                 p = 'H'
+                requestingPerson = d.corrected_by
             try:
-                cursor=connection.cursor()
-                cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(),reason = '"+cancelMessage+"',denied_by = '"+request.session["logged_user_chapa_no"] +"',phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
+                cursor = connection.cursor()
+                cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(), accepted_by = '" + logged_user_chapa_no + "',phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
                 success_message = "NCR cancellation success"
             except DatabaseError:
                 error_message = 'Error occured while Denying NCR. (NCR#' + ncr_no +')'
@@ -2828,18 +2924,17 @@ def ncr_verify_accept(request):
 
         except:
             phase = str(declarePhase(n.ncr_no))
-            create_cancel_request(n.ncr_no, phase , 'H', cancelMessage, request.session["logged_user_chapa_no"], current_datetime)
+            create_cancel_request(n.ncr_no, phase , 'H', cancelMessage, logged_user_chapa_no, current_datetime)
             success_message = "NCR cancellation success"
-
         
         n.status = '2'
-        #n.reason = cancelMessage
         n.close_date =  current_datetime
         n.delete_date = current_datetime
-        n.delete_user_id = request.session["logged_user_chapa_no"]
-        sendmail_ncr_cancelled(n,logged_user_chapa_no)
+        n.delete_user_id = logged_user_chapa_no
+        sendmail_ncr_req_cancel_accepted(n, logged_user_chapa_no, requestingPerson)
+        send_email_success = True
         n.save()
-
+        db_update_success = True
     #End adding for additional request Edric Marinas 2024/04/04
     
     if hidden_process == 'acceptA1':    
@@ -2877,8 +2972,6 @@ def ncr_verify_accept(request):
                                  error_message = "Database error ocurred while updating data with chapano =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"   
                          except :                                
                              error_message = "There was an error sending an email."
-                             
-                             
                     except Employee.DoesNotExist:
                          error_message = "Record with chapano =  " + n.ic_incharge + " does not exist in EMPLOYEE table"                                         
                 except Employee.DoesNotExist:
@@ -2889,9 +2982,7 @@ def ncr_verify_accept(request):
             error_message = 'Conformed By is Null'  
         
     elif hidden_process == 'acceptB1':  
-        
         if (n.rca_description in (None ,'')): 
-            
             if (n.nc_conformed_by not in (None ,'')):
                 if (n.ic_incharge not in (None ,'') ):
                 
@@ -2935,12 +3026,10 @@ def ncr_verify_accept(request):
                     error_message = 'ic_incharge is Null'
             else:
                 error_message = 'nc_conformed_by is Null'   
-            
         else:    
             if (n.ic_approve_by not in (None ,'')):
                 try:
                     e1 =  Employee.objects.get(chapano=n.ic_approve_by)
-                
                     try:
                         n.ic_approve_date = current_datetime
                         n.ic_approve_status = 1
@@ -3317,6 +3406,62 @@ def ncr_verify_accept(request):
         else:
             error_message = 'se_check_by_mgr'
 
+    #Added 2024/04/2
+    #elif process == 'cancelNCR':
+    elif hidden_process == 'cancelNCR': 
+
+        #error_message = create_deny_reason(n.ncr_no, n.rev_no, "", reasonA1, n.nc_conformed_by, current_datetime)
+        error_message = create_deny_reason(n.ncr_no, n.rev_no, "", cancelMessage, n.nc_conformed_by, current_datetime)
+        
+        if error_message in ('', None):
+            #create NCR_DETAIL_MSTR table
+            try:
+                n.close_date = current_datetime
+                n.status = '2' #cancelled
+                n.nc_conforme_status = None
+                n.save()   
+                db_update_success = True
+                
+                #error_message = sendmail_verify_deny(n.ncr_no, n.nc_conformed_by, n.ncr_issue_by, "X")
+                error_message = sendmail_ncr_cancelled(n, logged_user_chapa_no)
+                
+                if error_message in ('', None):
+                    send_email_success = True            
+                
+            except DatabaseError:
+                error_message = "Database error ocurred while updating data with ncr_no =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"
+    
+    #START: Add reginaldo-jsp 2025.02.07
+    elif hidden_process == 'requestToCancelNCR':
+
+        request.session["Message"] = ''
+        phase = str(declarePhase(ncr_no))
+        try:
+            cursor=connection.cursor()
+            #if cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(), reason = '"+ hidden_cancel_reason + "',denied_by = '',rev_no = '"+phase+"',phase = 'G' WHERE ncr_no = '" + n.ncr_no + "' AND phase='H' "):
+            if cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(), reason = '"+ hidden_cancel_reason + "',denied_by = '',rev_no = '"+phase+"', phase = 'G' WHERE ncr_no = '" + n.ncr_no + "'"):
+                request.session["Message"] = "Request to cancel is success"
+            else:
+                try:
+                    create_cancel_request(n.ncr_no, phase , 'G', hidden_cancel_reason, logged_user_chapa_no, current_datetime)
+                    request.session["Message"] = "Request to cancel is success"
+                except:
+                    error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')' 
+        except DatabaseError:
+            error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')'                           
+        finally:    
+            cursor.close
+                   
+        if request.session["Message"] not in (''):
+            n.status = '7'
+            n.save()
+            db_update_success = True 
+            sendmail_ncr_cancellation_requested(n, logged_user_chapa_no)
+            send_email_success = True
+        else:
+            error_message = 'Error occured while inserting NCR data in database. (NCR#' + ncr_no +')' 
+    #END: Add reginaldo-jsp 2025.02.07
+    
     #elif process == 'denyA1':
     elif hidden_process == 'denyA1':    
         error_message = create_deny_reason(n.ncr_no, n.rev_no, "A", reason, n.nc_conformed_by, current_datetime)
@@ -3337,30 +3482,6 @@ def ncr_verify_accept(request):
                 
             except DatabaseError:
                 error_message = "Database error ocurred while updating data with ncr_no =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"  
-    
-    #Added 2024/04/2
-    #elif process == 'cancelNCR':
-    elif hidden_process == 'cancelNCR': 
-        
-        #error_message = create_deny_reason(n.ncr_no, n.rev_no, "", reasonA1, n.nc_conformed_by, current_datetime)
-        error_message = create_deny_reason(n.ncr_no, n.rev_no, "", reason, n.nc_conformed_by, current_datetime)
-        
-        if error_message in ('', None):
-            #create NCR_DETAIL_MSTR table
-            try:
-                n.close_date = current_datetime
-                n.status = '2' #cancelled
-                n.nc_conforme_status = None
-                n.save()   
-                db_update_success = True
-                
-                error_message = sendmail_verify_deny(n.ncr_no, n.nc_conformed_by, n.ncr_issue_by, "X")
-                
-                if error_message in ('', None):
-                    send_email_success = True            
-                
-            except DatabaseError:
-                error_message = "Database error ocurred while updating data with ncr_no =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"
     
     #elif process == 'denyB1': 
     elif hidden_process == 'denyB1':             
@@ -3446,9 +3567,6 @@ def ncr_verify_accept(request):
         
     #elif process == 'denyC2D2':
     elif hidden_process == 'denyC2D2':     
-        
-        
-        
         #error_message = create_deny_reason(n.ncr_no, n.rev_no, "C", reasonC2, n.ca_approved_by_mgr, current_datetime) 
         
         #Start modify Edric  2024/03/21
@@ -3578,8 +3696,17 @@ def ncr_verify_accept(request):
                 error_message = "Database error ocurred while updating data with ncr_no =  " + n.ncr_no + " in NCR_DETAIL_MSTR table"             
     
     if error_message in (None, ''):
-        if db_update_success and send_email_success:
-            success_message = 'NCR data was successfully updated and email notification was sent.'  
+        #START: Add reginaldo-jsp 2024/02/11
+        if (hidden_process == 'cancelNCR' or hidden_process == 'cancelNCRaccept') and db_update_success and send_email_success:
+            success_message = "This NCR was succesfully cancelled and notification via email was sent."
+        elif hidden_process == 'requestToCancelNCR' and db_update_success and send_email_success:
+            success_message = "This NCR was succesfully change to request to cancel status and notification via email was sent."
+        elif hidden_process == 'denyCancelRequest' and db_update_success and send_email_success:
+            success_message = "Request to cancel this NCR was successfully denied and and notification via email" 
+        #if db_update_success and send_email_success:
+        elif db_update_success and send_email_success:
+        #END: Modify reginaldo-jsp 2024/02/11    
+            success_message = 'This NCR data was successfully updated and email notification was sent.'  
         elif db_update_success:
             success_message = 'NCR data was successfully updated.'
         
@@ -3767,7 +3894,6 @@ def sendmail_verify_accept(mailType, n):
                 content = "Sir/Madam,\n\n    Issued NCR had been accepted by Mr./Ms. " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + " and was assigned to you.\n\n    Click on the link below and fill-in your corrective action for this NCR.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Please accomplish necessary action and verify effectiveness within 1 month for Major NC.\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply." 
             if nc_discovered_by_email != send_to:
                 send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-                print("(in charge) Email sent to ChapaNo: " + e.chapano +" Email: "+  send_to)
         except:
             print("ERROR 2") 
         
@@ -3777,8 +3903,6 @@ def sendmail_verify_accept(mailType, n):
             rev = str(n.rev_no)
             content = "Sir/Madam,\n\n    A Nonconformance for " + str(dept) + " section had been accepted by Mr./Ms " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n  You can see the details by clicking the link below.\n\n   " + PROJ_URL + "ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."
             send_mail(subject, content, from_email, [nc_discovered_by_email], fail_silently=False,)
-            #print("(Discovered By) Email sent to  Email: "+  nc_discovered_by_email)
-            #print( "URL: "+ PROJ_URL + " ncr_create_view_history/" + n.ncr_no + "/" + rev + "/view")
         except:
             print("ERROR DISCOVERER")        
         #End
@@ -3801,7 +3925,6 @@ def sendmail_verify_accept(mailType, n):
                 content = "Sir/Madam,\n\n    A Nonconformance for " + str(dept)+ " section had been accepted by Mr./Ms " + e1.lastname + ", " + e1.firstname + " " + e1.middlename + ". \n\n    You can see the details by clicking the link below.\n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply."  
                 if nc_discovered_by_email != send_to:
                     send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-                    print("(Grp manager) Email sent to ChapaNo: " + x.chapano +" Email: "+ send_to)
         except:
             print("ERROR 3")
 
@@ -4246,10 +4369,19 @@ def ncr_create(request):
 
     ncr_no = form.data.get('ncr_no') 
     reason_action_not_effective = form.data.get('reason_action_not_effective') 
+
+    reason_action_not_effective = form.data.get('reason_action_not_effective') 
+
+    process = form.data.get('process') 
+    hidden_request_cancel = form.data.get('hidden_request_cancel') 
     
-    if is_error_on_required(request, form):    
-        error_message = 'Highlighted fields are required.'
-    
+    #START: Modifu reginaldo-jsp 2025.02.12
+    #if is_error_on_required(request, form):    
+    if process not in ('cancelNCR', 'denyCancelRequest', "acceptToCancelNCR") and hidden_request_cancel != "7":
+        if is_error_on_required(request, form): 
+            error_message = 'Highlighted fields are required.'
+    #START: Modifu reginaldo-jsp 2025.02.12
+
     is_form_valid = False
     send_email_success = True
 
@@ -4425,7 +4557,7 @@ def ncr_create(request):
                    'isSH' : isSH,
                    'isGrpMgr' : isGrpMgr,
                    'isAdmin' : isAdmin,
-                   'logged_username' : logged_username}  
+                   'logged_username' : logged_username,}  
 
         # display error on screen
         return render(request, 'NCRMgmntSystem/ncr_create.html', context)      
@@ -4649,9 +4781,12 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
     #Start adding for additional Request Edric Marinas 2024/04/04
     hidden_cancel_reason = form.cleaned_data['hidden_cancel_reason'];
     hidden_request_cancel = form.cleaned_data['hidden_request_cancel'];
-    
     #End adding for additional Request Edric Marinas 2024/04/04
     
+    #START: Add reginaldo-jsp 2025/02/07
+    process = form.cleaned_data['process'];
+    #END: Add reginaldo-jsp 2025/02/07 
+
     try:
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)  
 
@@ -4812,10 +4947,110 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         has_change_D = False
         has_change_E = False
         has_change_F = False
-                
         #Edric Marinas 2024/04/04
-        if hidden_request_cancel != '7':
+
+        #START: Add reginaldo-jsp 2025/02/07
+        b_database_updated = False
+        b_email_sent = False 
         
+        if process == 'cancelNCR':
+            try:
+                try:
+                    DenyReason.objects.get(ncr_no=ncr_no,phase='G')
+                    p = 'G'
+                except:
+                    DenyReason.objects.get(ncr_no=ncr_no,phase='H')
+                    p = 'H'
+                try:
+                    cursor=connection.cursor()
+                    #cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(),reason = '"+ hidden_cancel_reason +"',denied_by = '"+ login_user_chapa_no + "',phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
+                    cursor.execute("UPDATE deny_reason SET corrected_date = SYSDATE(), reason = '" + hidden_cancel_reason + "', corrected_by = '" + login_user_chapa_no + "', phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
+                    success_message = "NCR cancellation success"
+                except DatabaseError:
+                    error_message = 'Error occured while Denying NCR. (NCR#' + ncr_no +')'
+
+            except DatabaseError:
+                error_message = 'Error occured while Denying NCR. (NCR#' + ncr_no +')' 
+
+            except:
+                phase = str(declarePhase(n.ncr_no))
+                create_cancel_request(n.ncr_no, phase , 'H', hidden_cancel_reason, login_user_chapa_no, current_datetime)
+                success_message = "NCR cancellation success"
+        
+            n.status = '2'
+            n.close_date =  current_datetime
+            n.delete_date = current_datetime
+            n.delete_user_id = login_user_chapa_no
+            sendmail_ncr_cancelled(n, login_user_chapa_no)
+            b_email_sent = True
+            n.save()
+            b_database_updated = True 
+            
+        elif process == 'denyCancelRequest':  
+            requestingPerson = ''
+
+            try:
+                d = DenyReason.objects.get(ncr_no=ncr_no,phase='G')
+                requestingPerson = d.corrected_by
+                try:
+                    cursor=connection.cursor()
+                    #cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(), reason = '" + hidden_cancel_reason + "', denied_by = '" + login_user_chapa_no + "', phase = 'H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='G' ")
+                    cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(), reason = '" + hidden_cancel_reason + "', denied_by = '" + login_user_chapa_no + "', phase = 'H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='G' ")
+                    success_message = "Deny cancel request success";
+                except DatabaseError:
+                    print('Error occured while Denying NCR. (NCR#' + ncr_no +')')              
+                finally:    
+                    cursor.close
+            
+                if success_message not in (''):
+                    sendmail_ncr_req_cancel_denied(n, login_user_chapa_no, requestingPerson)
+                    b_email_sent = True
+                    n.status = '4'
+                    n.save()
+                    b_database_updated = True 
+            except:
+                error_message = 'No record'
+    
+        elif process == 'acceptToCancelNCR':
+            requestingPerson = ''
+            try:
+                try:
+                    d = DenyReason.objects.get(ncr_no=ncr_no,phase='G')
+                    p = 'G'
+                    requestingPerson = d.corrected_by
+                except:
+                    DenyReason.objects.get(ncr_no=ncr_no,phase='H')
+                    p = 'H'
+                    requestingPerson = d.corrected_by
+                try:
+                    cursor=connection.cursor()
+                    #cursor.execute("UPDATE deny_reason SET denied_date = SYSDATE(),reason = '" + hidden_cancel_reason + "', denied_by = '" + login_user_chapa_no + "', phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
+                    cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(), accepted_by = '" + login_user_chapa_no + "', phase ='H' WHERE ncr_no = '" + n.ncr_no + "' AND phase='"+ p +"' ")
+                    success_message = "NCR cancellation success"
+                except DatabaseError:
+                    error_message = 'Error occured while Denying NCR. (NCR#' + ncr_no +')'
+
+            except DatabaseError:
+                error_message = 'Error occured while Denying NCR. (NCR#' + ncr_no +')' 
+
+            except:
+                phase = str(declarePhase(n.ncr_no))
+                create_cancel_request(n.ncr_no, phase , 'H', hidden_cancel_reason, login_user_chapa_no, current_datetime)
+                success_message = "NCR cancellation success"
+        
+            n.status = '2'
+            n.close_date =  current_datetime
+            n.delete_date = current_datetime
+            n.delete_user_id = login_user_chapa_no
+            sendmail_ncr_req_cancel_accepted(n, login_user_chapa_no, requestingPerson)
+
+            b_email_sent = True
+            n.save()
+            b_database_updated = True
+        
+        #if hidden_request_cancel != '7':
+        elif hidden_request_cancel != '7':            
+        #END: Add reginaldo-jsp 2025/02/07
             #A. Nonconformance detail description
             if (n_source != source or n.other_source != n_other_source or n_classification != classification or n_nc_detail_description != nc_detail_description or n_nc_discovered_by != nc_discovered_by or n_nc_conformed_by != nc_conformed_by.chapano or n_ic_incharge != ic_incharge_chapano or consumed_mh1 != n_consumed_mh1) and ic_description in ('', None):        
                 has_change_A = True  
@@ -5003,10 +5238,6 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
         n.update_date = current_datetime
         #Start modifying for additional request Edric Marinas 2024/04/17
         try:
-            #has_update = False
-            b_database_updated = False
-            b_email_sent = False 
-
             if has_change_A or has_change_B or has_change_C or has_change_D or has_change_E or has_change_F:
                 #has_update = True
                 #update data
@@ -5128,7 +5359,9 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                 phase = str(declarePhase(ncr_no))
                 try:
                     cursor=connection.cursor()
-                    if cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(),reason = '"+hidden_cancel_reason+"',denied_by = '',rev_no = '"+phase+"',phase = 'G' WHERE ncr_no = '" + n.ncr_no + "' AND phase='H' "):
+                    #if cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(),reason = '"+hidden_cancel_reason+"',denied_by = '',rev_no = '"+phase+"',phase = 'G' WHERE ncr_no = '" + n.ncr_no + "' AND phase='H' "):
+                    if cursor.execute("UPDATE deny_reason SET accepted_date = SYSDATE(),reason = '"+hidden_cancel_reason+"',denied_by = '',rev_no = '"+phase+"',phase = 'G' WHERE ncr_no = '" + n.ncr_no + "'"):
+                     
                         request.session["Message"] = "Request to cancel is success"
                     else:
                         try:
@@ -5148,7 +5381,8 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
                         #sendmail_NCR_cancel_request(phase, n)
                         n.save()
                         b_database_updated = True
-                        sendmail_NCR_cancel_request(phase, n)
+                        #sendmail_NCR_cancel_request(phase, n)
+                        sendmail_ncr_cancellation_requested(n, login_user_chapa_no)
                         b_email_sent = True
                         #END: modify reginaldo-jsp 2025.01.24 
                     else:
@@ -5159,10 +5393,16 @@ def ncr_create_update(request, form, ncr_no, login_user_chapa_no, edit_cause):
             #if has_update:
             #    n.save()
 
-            if b_database_updated and b_email_sent :
-                request.session["Message"] = "NCR data was succesfully updated in database and notification via email was sent." 
+            if (process == 'cancelNCR' or process == 'acceptToCancelNCR') and b_database_updated and b_email_sent:
+                request.session["Message"] = "This NCR was succesfully cancelled and notification via email was sent."
+            elif process == 'denyCancelRequest' and b_database_updated and b_email_sent:
+                request.session["Message"] = "Request to cancel this NCR was successfully denied and and notification via email was sent."
+            elif hidden_request_cancel == '7' and b_database_updated and b_email_sent:
+                request.session["Message"] = "This NCR data was succesfully change to request to cancel status and notification via email was sent."
+            elif b_database_updated and b_email_sent:
+                request.session["Message"] = "This NCR data was succesfully updated in database and notification via email was sent." 
             elif b_database_updated  :
-                request.session["Message"] = "NCR data was succesfully updated in database."     
+                request.session["Message"] = "This NCR data was succesfully updated in database."     
             elif b_email_sent :
                 request.session["Message"] = "Notification via email was sent."     
             else:
@@ -5346,7 +5586,6 @@ def employee_password_change(request, chapano):
 
 #Start added Edric Marinas 2024/04/11
 def declarePhase(ncr_no):
-
     phase = ''
 
     try:
@@ -5378,86 +5617,542 @@ def declarePhase(ncr_no):
 
     return phase
 
-
-def sendmail_ncr_cancelled(n,logged_chapaNo):
-    subject = 'NCR Create Status Notification: ' + str(n.ncr_no)       
+#Send Notification via email when NCR was cancelled
+def sendmail_ncr_cancelledx(n, logged_user_chapa_no):
+    subject = 'NCR Cancellation Notification: ' + str(n.ncr_no)       
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     send_to = ""
+    issued_from_section = ''
+    issued_to_section_name = ''
+    issued_to_sh = ''
+    name = ''
 
+    #Acquire section that issued this NCR
+    try:
+        #SELECT * FROM `rank` WHERE chapano = '?'
+        ex = Rank.objects.get(chapano=n.ncr_issue_by)
+        issued_from_section = ex.deptid
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+    #Acquire the section name to which this NCR was issued to
+    try:
+        #SELECT * FROM dept WHERE id = '?'
+        d = Dept.objects.get(id=n.dept_id)
+        section_name = d.name
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'    
 
     try:
-        e =  Employee.objects.get(chapano=n.ca_checked_by_sh)
-        if n.ca_checked_by_sh != logged_chapaNo:
-            e =  Employee.objects.get(chapano=n.ca_checked_by_sh)
+        #Get SH of the section that this NCR was issued to 
+        #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+        ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+        issued_to_sh = ex.chapano
+    except Rank.DoesNotExist:
+        error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+   
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("user's data not in EMPLOYEE table")  
+        error_message = "User's data not in EMPLOYEE table"   
+
+    assigned_to_chapano = ''
+
+    if n.ra_check_by_staff not in ('', None):
+        assigned_to_chapano = n.ra_check_by_staff 
+    elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+        assigned_to_chapano = n.ca_create_by  
+    elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+        assigned_to_chapano = n.rca_incharge
+    elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+        assigned_to_chapano = n.ic_incharge
+    #elif n.nc_conformed_by not in ('', None) and n.ic_incharge in ('', None):
+    #    assigned_to_chapano =n.nc_conformed_by    
+    elif n.ncr_issue_by not in ('', None): 
+        assigned_to_chapano = n.ncr_issue_by     
+
+    # Send email to assigned person
+    if logged_user_chapa_no != assigned_to_chapano and assigned_to_chapano not in ('', None): 
+        try:
+            e =  Employee.objects.get(chapano=assigned_to_chapano)
             send_to = e.email
             user_id = e.chapano
-            content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            content = "Sir/Madam,\n\n    Good day.\n\n    A Nonconformance assigned to you had been cancelled by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
             send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-    except:
-        print("No ca_checked_by_sh")
+        except:
+            print("Assigned person's data not in EMPLOYEE table")  
 
-
-    try:#send mail to Incharge
-        e = Employee.objects.get(chapano=n.ic_incharge)
-        send_to = e.email
-        user_id = e.chapano
-        content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
-        send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-    except:
-        print("no ic_incharge")
-
-    
-    try: #send mail to RCA approve by OR ca Checked by if ever they are not the same user (BOTH WILL RECEIVE IF THE ONE WHO CANCEL NCR IS NEITHER ONE OF THEM)
-        e =  Employee.objects.get(chapano=n.rca_approve_by)    
-        if n.rca_approve_by not in  (n.ca_checked_by_sh,logged_chapaNo):#check if the user logged in is not same as SH
-            e =  Employee.objects.get(chapano=n.rca_approve_by)
+    #Send email to SH   
+    if logged_user_chapa_no != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=issued_to_sh)
             send_to = e.email
             user_id = e.chapano
-            content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            content = "Sir/Madam,\n\n    Good day.\n\n    A Nonconformance issued to in your section had been cancelled by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
             send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-        else:
-            print("rca_approve_by and ca_checked_by_sh are same person or logged user is same as rca_approve_by")
-    except:
-        print("no rca_approve_by ")
+        except:
+            print("SH's data not in EMPLOYEE table") 
 
-    
-    try:
-        e = Employee.objects.get(chapano=n.ca_approved_by_mgr)
-        send_to = e.email
-        user_id = e.chapano
-        if logged_chapaNo != user_id:
-            content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+    #Send email to person who accept this NCR  
+    if logged_user_chapa_no != n.nc_conformed_by and issued_to_sh != n.nc_conformed_by:
+        try:
+            e =  Employee.objects.get(chapano=n.nc_conformed_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A Nonconformance issued to in your section had been cancelled by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
             send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-    except:
-        print("No ca_approved_by_mgr")
-
-    
-    try:
-        e = Employee.objects.get(chapano=n.se_check_by_mgr)
-        send_to = e.email
-        user_id = e.chapano
-        if logged_chapaNo != user_id:
-            content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+        except:
+            print("SH's data not in EMPLOYEE table")     
+            
+    #Send email to person who issued this NCR  
+    if issued_from_section != n.dept_id and logged_user_chapa_no != n.ncr_issue_by and logged_user_chapa_no != assigned_to_chapano  :
+        try:
+            e =  Employee.objects.get(chapano=n.ncr_issue_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    A Nonconformance you issued to " + issued_to_section_name +  " section had been cancelled by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
             send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-    except:
-        print("No se_check_by_mgr")
-    
-    
-    try:
-        e = Employee.objects.get(chapano=n.se_check_by_qa)
-        send_to = e.email
-        user_id = e.chapano
-        if logged_chapaNo != user_id:
-            content = "Sir/Madam,\n\n    A Nonconformance has been cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
-            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
-    except:
-        print("No se_check_by_qa")
+        except:
+            print("Issuer's data not in EMPLOYEE table")            
 
     return
 
+def sendmail_ncr_cancelled(n, logged_user_chapa_no):
+    subject = 'NCR Cancellation Notification: ' + str(n.ncr_no)           
+    from_email = 'NCR_Mgnt_Sys@shi-g.com'
+    send_to = ""
+    issued_from_section = ''
+    issued_to_section_name = ''
+    issued_to_sh = ''
+    name = ''
 
+    #Acquire section that issued this NCR
+    try:
+        #SELECT * FROM `rank` WHERE chapano = '?'
+        ex = Rank.objects.get(chapano=n.ncr_issue_by)
+        issued_from_section = ex.deptid
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+    #Acquire the section name to which this NCR was issued to
+    try:
+        #SELECT * FROM dept WHERE id = '?'
+        d = Dept.objects.get(id=n.dept_id)
+        section_name = d.name
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'    
+
+    try:
+        #Get SH of the section that this NCR was issued to 
+        #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+        ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+        issued_to_sh = ex.chapano
+    except Rank.DoesNotExist:
+        error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+   
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("user's data not in EMPLOYEE table")  
+        error_message = "User's data not in EMPLOYEE table"   
+
+    assigned_to_chapano = ''
+
+    if issued_from_section == n.dept_id:
+        if n.ra_check_by_staff not in ('', None):
+            assigned_to_chapano = n.ra_check_by_staff 
+        elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+            assigned_to_chapano = n.ca_create_by  
+        elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+            assigned_to_chapano = n.rca_incharge
+        elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+            assigned_to_chapano = n.ic_incharge
+        elif n.ncr_issue_by not in ('', None): 
+            assigned_to_chapano = n.ncr_issue_by       
+
+    # Send email to assigned person
+    if logged_user_chapa_no != assigned_to_chapano and assigned_to_chapano not in ('', None): 
+        try:
+            e =  Employee.objects.get(chapano=assigned_to_chapano)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A nonconformance assigned to you had been cancelled by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Assigned person's data not in EMPLOYEE table")  
+
+    #Send email to SH   
+    if logged_user_chapa_no != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=issued_to_sh)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A nonconformance issued to in your section had been cancelled by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table") 
+
+    #Send email to person who accept this NCR   
+    if logged_user_chapa_no != n.nc_conformed_by and n.nc_conformed_by != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=n.nc_conformed_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A nonconformance issued to in your section had been cancelled by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table")         
+        
+    return
+
+def sendmail_ncr_req_cancel_accepted(n, logged_user_chapa_no, requestingPerson):
+    subject = 'NCR Cancellation (Accepted) Notification: ' + str(n.ncr_no)             
+    from_email = 'NCR_Mgnt_Sys@shi-g.com'
+    send_to = ""
+    issued_from_section = ''
+    issued_to_section_name = ''
+    issued_to_sh = ''
+    name = ''
+
+    #Acquire section that issued this NCR
+    try:
+        #SELECT * FROM `rank` WHERE chapano = '?'
+        ex = Rank.objects.get(chapano=n.ncr_issue_by)
+        issued_from_section = ex.deptid
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+    #Acquire the section name to which this NCR was issued to
+    try:
+        #SELECT * FROM dept WHERE id = '?'
+        d = Dept.objects.get(id=n.dept_id)
+        section_name = d.name
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'    
+
+    try:
+        #Get SH of the section that this NCR was issued to 
+        #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+        ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+        issued_to_sh = ex.chapano
+    except Rank.DoesNotExist:
+        error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+   
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("user's data not in EMPLOYEE table")  
+        error_message = "User's data not in EMPLOYEE table"   
+
+    assigned_to_chapano = ''
+
+    if issued_from_section == n.dept_id:
+        if n.ra_check_by_staff not in ('', None):
+            assigned_to_chapano = n.ra_check_by_staff 
+        elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+            assigned_to_chapano = n.ca_create_by  
+        elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+            assigned_to_chapano = n.rca_incharge
+        elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+            assigned_to_chapano = n.ic_incharge
+        elif n.ncr_issue_by not in ('', None): 
+            assigned_to_chapano = n.ncr_issue_by       
+
+    # Send email to requesting person
+    if logged_user_chapa_no != requestingPerson: 
+        try:
+            e =  Employee.objects.get(chapano=requestingPerson)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    Your request to cancel a nonconformance had been accepted by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Assigned person's data not in EMPLOYEE table") 
+
+    # Send email to assigned person
+    if logged_user_chapa_no != assigned_to_chapano and requestingPerson != assigned_to_chapano and assigned_to_chapano not in ('', None): 
+        try:
+            e =  Employee.objects.get(chapano=assigned_to_chapano)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance assigned to you had been accepted by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Assigned person's data not in EMPLOYEE table")  
+
+    #Send email to SH   
+    if logged_user_chapa_no != issued_to_sh and requestingPerson != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=issued_to_sh)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance issued to in your section had been accepted by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table") 
+
+    #Send email to person who accept this NCR   
+    if logged_user_chapa_no != n.nc_conformed_by and n.nc_conformed_by != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=n.nc_conformed_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance issued to in your section had been accepted by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table")         
+        
+    return
+
+def sendmail_ncr_req_cancel_denied(n, logged_user_chapa_no, requestingPerson):
+    subject = 'NCR Cancellation (Denied) Notification: ' + str(n.ncr_no)       
+    from_email = 'NCR_Mgnt_Sys@shi-g.com'
+    send_to = ""
+    issued_from_section = ''
+    issued_to_section_name = ''
+    issued_to_sh = ''
+    name = ''
+
+    #Acquire section that issued this NCR
+    try:
+        #SELECT * FROM `rank` WHERE chapano = '?'
+        ex = Rank.objects.get(chapano=n.ncr_issue_by)
+        issued_from_section = ex.deptid
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+    #Acquire the section name to which this NCR was issued to
+    try:
+        #SELECT * FROM dept WHERE id = '?'
+        d = Dept.objects.get(id=n.dept_id)
+        section_name = d.name
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'    
+
+    try:
+        #Get SH of the section that this NCR was issued to 
+        #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+        ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+        issued_to_sh = ex.chapano
+    except Rank.DoesNotExist:
+        error_message = 'No section head is assigned in Rank table for dept = ' + n.dept_id + '.'    
+   
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("user's data not in EMPLOYEE table")  
+        error_message = "User's data not in EMPLOYEE table"   
+
+    assigned_to_chapano = ''
+
+    if issued_from_section == n.dept_id:
+        if n.ra_check_by_staff not in ('', None):
+            assigned_to_chapano = n.ra_check_by_staff 
+        elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+            assigned_to_chapano = n.ca_create_by  
+        elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+            assigned_to_chapano = n.rca_incharge
+        elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+            assigned_to_chapano = n.ic_incharge
+        elif n.ncr_issue_by not in ('', None): 
+            assigned_to_chapano = n.ncr_issue_by       
+
+    # Send email to requesting person
+    if logged_user_chapa_no != requestingPerson: 
+        try:
+            e =  Employee.objects.get(chapano=requestingPerson)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    Your request to cancel a nonconformance had been denied by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Assigned person's data not in EMPLOYEE table") 
+
+    # Send email to assigned person
+    if logged_user_chapa_no != assigned_to_chapano and requestingPerson != assigned_to_chapano and assigned_to_chapano not in ('', None): 
+        try:
+            e =  Employee.objects.get(chapano=assigned_to_chapano)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance assigned to you had been denied by Mr./Ms." + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Assigned person's data not in EMPLOYEE table")  
+
+    #Send email to SH   
+    if logged_user_chapa_no != issued_to_sh and requestingPerson != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=issued_to_sh)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance issued to in your section had been denied by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table") 
+
+    #Send email to person who accept this NCR   
+    if logged_user_chapa_no != n.nc_conformed_by and n.nc_conformed_by != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=n.nc_conformed_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A request to cancel a nonconformance issued to in your section had been denied by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table")         
+        
+    return
+
+#Send Notification via email when NCR cancellation is requested
+def sendmail_ncr_cancellation_requested(n, logged_user_chapa_no):
+    subject = 'NCR Cancellation Request Notification: ' + str(n.ncr_no)       
+    from_email = 'NCR_Mgnt_Sys@shi-g.com'
+    send_to = ""
+    issued_from_section = ''
+    issued_to_section_name = ''
+
+    #Acquire section that issued this NCR
+    try:
+        #SELECT * FROM `rank` WHERE chapano = '?'
+        ex = Rank.objects.get(chapano=n.ncr_issue_by)
+        issued_from_section = ex.deptid
+    except Rank.DoesNotExist:
+        error_message = 'Record with chapaNo = doesn''t exist in Rank table.'
+
+    #Acquire the section name to which this NCR was issued to
+    try:
+        #SELECT * FROM dept WHERE id = '?'
+        d = Dept.objects.get(id=n.dept_id)
+        issued_to_section_name = d.name
+    except Rank.DoesNotExist:
+        print("Section's data not in DEPT table.")  
+        error_message = "Section's data not in DEPT table."    
+
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("User's data not in EMPLOYEE table")  
+        error_message = "User's data not in EMPLOYEE table."
+
+    try:
+        #Get SH of the section that this NCR was issued to 
+        #SELECT * FROM `rank` WHERE chapano = '?' and positionId = '?'
+        ex = Rank.objects.get(positionid='5', deptid=n.dept_id)
+        issued_to_sh = ex.chapano
+    except Rank.DoesNotExist:
+        print("SH's data for dept = " + n.dept_id + " not in RANK table.") 
+        error_message = "SH's data for dept = " + n.dept_id + " not in RANK table."  
+   
+    assigned_checker_chapano = ''
+
+    if n.ra_check_by_sh not in ('', None): 
+        assigned_checker_chapano = n.ra_check_by_sh
+    elif n.ca_checked_by_sh not in ('', None) and n.ra_check_by_sh in ('', None): 
+        assigned_checker_chapano = n.ca_checked_by_sh
+    elif n.rca_approve_by not in ('', None) and n.ca_checked_by_sh in ('', None): 
+        assigned_checker_chapano = n.rca_approve_by
+    elif n.ic_approve_by not in ('', None) and n.rca_approve_by in ('', None): 
+        assigned_checker_chapano = n.ic_approve_by
+    elif n.nc_conformed_by not in ('', None) and n.ic_approve_by in ('', None): 
+        assigned_checker_chapano = n.nc_conformed_by 
+
+    assigned_to_chapano = ''
+
+    if n.ra_check_by_staff not in ('', None):
+        assigned_to_chapano = n.ra_check_by_staff 
+    elif n.ca_create_by not in ('', None) and n.ra_check_by_staff in ('', None):
+        assigned_to_chapano = n.ca_create_by  
+    elif n.rca_incharge not in ('', None) and n.ca_create_by in ('', None):
+        assigned_to_chapano = n.rca_incharge
+    elif n.ic_incharge not in ('', None) and n.rca_incharge in ('', None):
+        assigned_to_chapano = n.ic_incharge
+    #elif n.ncr_issue_by not in ('', None): 
+    #    assigned_to_chapano = n.ncr_issue_by                    
+
+    # Send email to assigned checker
+    if logged_user_chapa_no != assigned_checker_chapano and assigned_checker_chapano not in ('', None): 
+        try:
+            e =  Employee.objects.get(chapano=assigned_checker_chapano)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A cancellation for a nonconformance in your section had been requested by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Checker's data not in EMPLOYEE table")  
+
+    # Send email to in-charge if NCR was issued from other section
+    if logged_user_chapa_no != assigned_to_chapano: 
+        try:
+            e =  Employee.objects.get(chapano=assigned_to_chapano)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A cancellation for a nonconformance assigned to you had been requested by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("In-charge's data not in EMPLOYEE table")           
+
+    #Send email to SH   
+    if logged_user_chapa_no != issued_to_sh and assigned_checker_chapano != issued_to_sh:
+        try:
+            e =  Employee.objects.get(chapano=issued_to_sh)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A cancellation for a nonconformance in your section had been requested by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("SH's data not in EMPLOYEE table")   
+
+    #In case NCR was issued from other section, send email to person who issued this NCR  
+    if issued_from_section != n.dept_id and logged_user_chapa_no != n.ncr_issue_by:
+        try:
+            e =  Employee.objects.get(chapano=n.ncr_issue_by)
+            send_to = e.email
+            user_id = e.chapano
+            content = "Sir/Madam,\n\n    Good day.\n\n    A cancellation for nonconformance you issued to " + issued_to_section_name +  " section has been requested by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details and proceed with NCR process.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+            send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+        except:
+            print("Issuer's data not in EMPLOYEE table")               
+
+    return
+
+ #Send Notification via email when request for NCR cancellation is denied
+def sendmail_NCR_cancel_request(n, logged_user_chapa_no, send_to_chapa):
+    subject = 'Deny NCR Cancellation Request Notification: ' + str(n.ncr_no)       
+    from_email = 'NCR_Mgnt_Sys@shi-g.com'
+    
+    #Get name of user  
+    try:
+        user = Employee.objects.get(chapano=logged_user_chapa_no)
+        name = user.lastname + ', ' + user.firstname + ' ' + user.middlename + '.'
+    except Employee.DoesNotExist:
+        print("User's data not in EMPLOYEE table")      
+
+    # Send email to requesting person
+    try:
+        e =  Employee.objects.get(chapano = send_to_chapa)
+        send_to = e.email
+        user_id = e.chapano
+        content = "Sir/Madam,\n\n    Good day.\n\n    Your request to cancel a nonconformance had been denied by Mr./Ms. " + name + ". \n\n    Kindly click on the link below to see the details.\n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "
+        send_mail(subject, content, from_email, [send_to], fail_silently=False,)
+    except:
+        print("Requesting person's data not in EMPLOYEE table")    
+
+    return   
+
+## For delete
 def sendmail_NCR_cancel_request(mailType, n):
-    subject = 'NCR Create Status Notification: ' + str(n.ncr_no)       
+    subject = 'NCR Cancellation Request Notification: ' + str(n.ncr_no)       
     from_email = 'NCR_Mgnt_Sys@shi-g.com'
     send_to = ''  
     
@@ -5468,7 +6163,7 @@ def sendmail_NCR_cancel_request(mailType, n):
         e =  Employee.objects.get(chapano=n.ic_incharge)
         send_to = e.email
         user_id = e.chapano
-        content = "Sir/Madam,\n\n    A Nonconformance you request for cancellation is denied. \n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "+mailType+"  "
+        content = "Sir/Madam,\n\n    A nonconformance you request for cancellation is denied. \n\n    " + PROJ_URL + "ncr_create_view_upd_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "+mailType+"  "
         send_mail(subject, content, from_email, [send_to, ], fail_silently=False,)
         return
     
@@ -5520,12 +6215,7 @@ def sendmail_NCR_cancel_request(mailType, n):
         user_id = e.chapano
    
 
-    #elif mailType == 'F':
-        #e =  Employee.objects.get(chapano=n.se_check_by_qa)  
-        #send_to = e.email
-        #user_id = e.chapano
     elif mailType == '7':
-
         try:
             e =  Employee.objects.get(chapano=n.ra_check_by_sh)  
             user_id = e.chapano
@@ -5545,15 +6235,11 @@ def sendmail_NCR_cancel_request(mailType, n):
         except DatabaseError:
             print("There was an error sending an email to se_check_by_qa.")
 
-
         return
     else:
         print("There was an error sending an email.")
 
-
-
     content = "Sir/Madam,\n\n    A Nonconformance has been requested to be cancelled in your section. \n\n    " + PROJ_URL + "ncr_verify_view_via_mail/" + n.ncr_no + "/" + user_id + "\n\n    Thank you for using the NCR Management System. \n\n    This is a system-generated e-mail. Please do not reply. "+mailType+"  "
-
 
     #send email
     try:
@@ -5676,16 +6362,11 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
     else:
         logged = False
     
-    
     try:
-
         n =  NcrDetailMstr.objects.get(ncr_no=ncr_no)
         max_rev = n.rev_no
-        
-        
         sqlStmt = """
                   SELECT * FROM `ncr_detail_mstr_history` WHERE ncr_no = '"""+n.ncr_no+"""' AND rev_no = '"""+ rev_no +"""'  """  
-        
         with connection.cursor() as c:
             c.execute(sqlStmt)
             x = namedtuplefetchall(c)
@@ -5820,12 +6501,9 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
         
     sqlStmt = sqlStmt + " and d.ncr_no = '" + ncr_no + "' and d.rev_no = '" + str(n.rev_no) + "'"   
     
-    
     with connection.cursor() as c:
         c.execute(sqlStmt)
         deny_reasonB_data = namedtuplefetchall(c)   
-        
-        
         phase = ''
         
         for rec in deny_reasonB_data:
@@ -5866,22 +6544,11 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
                 is_denied_D = '1'
                 is_denied_E = '1'
                 is_denied_F = '1'
-                
-                    
-    
-
-        
     
     ncr_no_size = 'S'
     if len(ncr_no) > 25:     
         ncr_no_size = 'L'
-                
-
-
-
-
-
-
+    
     form = NCRCreateForm(initial={                
             'ncr_no' : n.ncr_no, 
             'ncr_issue_date' : ncr_issue_date, 
@@ -5960,7 +6627,6 @@ def ncr_create_view_history(request, ncr_no, rev_no,pageType):
             'is_F_on_edit_mode' : 'X',
             'ra_check_by_staff_name' : ra_check_by_staff_name,
             })
-    
     
     context = {
                'logged': logged,

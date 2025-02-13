@@ -44,22 +44,13 @@ ACTION_EFFECTIVE_CHOICES = [
     ('2', 'For follow-up on date' ), 
 ]
 
-
-
-
 YES_NO = [    
-    ('1', 'Yes'),
-    
-    
+    ('1', 'Yes'),   
 #Start of modify for additional request Edric Marinas 2024/02/26
-    #('0', 'No'), 
-    
+    #('0', 'No'),     
     ('0', ''),   
-    #End of modify for additional request Edric Marinas 2024/02/26
+#End of modify for additional request Edric Marinas 2024/02/26
 ]
-
-
-
 
 STATUS = [    
     ('', '---------'),          
@@ -68,10 +59,10 @@ STATUS = [
     ('3', 'Accepted'),    
     ('4', 'On-going'),    
     ('5', 'Closed'),    
-    ('6', 'Delayed'),    
-    #Start modifying for additional request Edric Marinas 2024/04/04 
-    ('7', 'Cancel Request'), 
-    #End modifying for additional request Edric Marinas 2024/04/04
+    ('6', 'Delayed'),   
+    #START: Modify reginaldo-jsp 2025.01.30 
+    ('7', 'With Request To Cancel NCR'), 
+    #END: Modify reginaldo-jsp 2025.01.30
     ('8', 'For Follow-up'), 
 ]
 
@@ -86,14 +77,10 @@ ADVANCE_USERS = [
     
 #NCOA01 Form       
 class NCRCreateForm(forms.Form):    
-    
-    
     #Edric
     S_or_SN = CharField(widget=HiddenInput(
         attrs={'class': 'form-control', 'id':'S_or_SN'}), 
         required=False) 
-
-    
     
     #Start adding for additional request Edric Marinas 2024/04/04
     hidden_request_cancel = CharField(widget=HiddenInput(attrs={'class': 'form-control', 'id':'hidden_request_cancel'}), 
@@ -158,8 +145,6 @@ class NCRCreateForm(forms.Form):
     nc_discovered_by = forms.CharField(
         widget=forms.TextInput(attrs={ 'class': 'form-control', 'id':'nc_discovered_by','size':10}),
         required=False, label='Staff: ', max_length=40)     
-
-    
     nc_conformed_by = forms.ModelChoiceField(
         required=False, 
         label='SH: ',
@@ -401,8 +386,6 @@ class NCRCreateForm(forms.Form):
         #EdricEmail
         self.fields['nc_discovered_by_email'].widget.attrs['size'] = 30 
         
-        
-        
         self.fields['dept'].widget.attrs['class'] = 'form-control'
         self.fields['project'].widget.attrs['class'] = 'form-control'
         
@@ -496,7 +479,11 @@ class NCRVerifyForm(forms.Form):
     
     current_datetime = CharField(widget=HiddenInput(attrs={'type':'text','class': 'form-control', 'id':'current_datetime'}), 
         required=False) 
-
+    
+    #START: Add reginaldo-jsp 2025.02.11
+    hidden_cancel_reason = CharField(widget=HiddenInput(attrs={'class': 'form-control', 'id':'hidden_cancel_reason'}), 
+        required=False) 
+    #END: Add reginaldo-jsp 2025.02.11
 
 #NCOA03 Form   
 class NCRSearchForm(forms.Form):

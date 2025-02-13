@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'MgmntSystem.wsgi.application'
 #    }
 #}
 
-#DB for acceptance test
+#DB for local test
 #DATABASES = {
 #    'default': {
 #        'ENGINE': 'django.db.backends.mysql',

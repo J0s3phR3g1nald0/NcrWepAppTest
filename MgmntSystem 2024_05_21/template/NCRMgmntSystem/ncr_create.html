@@ -6,14 +6,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-  
-  
   {% load static %}
   
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">-->
-    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.7/dist/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'bootstrap-3.3.7/dist/css/bootstrap.min.css' %}">
 
-    <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>-->
   <script src="{% static 'js/jquery-1.8.3.js' %}"> </script>
     
   <!--<script src="{% static 'js/bootstrap.js' %}"> </script>-->
@@ -31,8 +29,6 @@
     #nc_discovered_by{
         width: 200px;
     }
-
-
 
     .datepicker-dropdown {
       top: 0;
@@ -91,7 +87,6 @@
   background-color: #419841;
   border-color: #285e8e;
 }
-
 
 .datepicker table tr td.active:active:hover,
 .datepicker table tr td.active.highlighted:active:hover,
@@ -202,7 +197,8 @@
     </style>
 
 <script type='text/javascript'>
-    $(function(){
+ 
+    $(function() {
         $('.input-group.date').datepicker({
             orientation: "auto left",
             forceParse: false,
@@ -243,7 +239,6 @@
                             
                             //<!-- Modify for additional request-->
                             checkboxFunction();
-                            
                             
                             $('#forReadOnlyF').hide(); 
                             $("#se_description").attr("disabled", true);
@@ -289,7 +284,6 @@
                             
                             //<!-- Modify for additional request-->
                             checkboxFunction();
-                            
                             
                             $('#forReadOnlyF').hide(); 
                             $("#se_description").attr("disabled", false);
@@ -557,8 +551,6 @@
             
             //<!-- Modify for additional request-->
             checkboxFunction();
-            
-            
         }
         
         selected_classification = $("input[name='classification']:checked").val(); 
@@ -571,8 +563,6 @@
             
             //<!-- Modify for additional request-->
             checkboxFunction();
-            
-            
         } 
         
         if($('#ra_check_date_by_sh').val() != '') {
@@ -593,7 +583,6 @@
                 $('#forReadOnlyD').hide();    
             }
         }  
-
     }     
         
 </script>
@@ -677,7 +666,6 @@
     <h1 style="font-family: Century Gothic;font-size: x-large;color: #eee;margin-right: 280px;margin-top: 10px;">株式会社 SDMI</h1>
   </div>
 
-
   <div class="container-fluid">
     <div class="navbar-header">
       <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
@@ -760,6 +748,34 @@
 
 <!-- Modal HTML -->
 
+<!-- Start adding for additional request Edric 2024/04/04 -->
+{%if data.status == '7'%}
+<div class="modal fade" role="dialog" id="cancelRequest_modal">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <center><h3 class="modal-title"><font color="blue">Cancellation Request</font></h3>
+                    <h5>This NCR was requested to be cancelled</h5>
+                </center>
+            </div>
+            <div class="modal-body">
+                <label for="reason" class="col-form-label">Reason/s:</label><br>
+                <textarea class="form-control" rows="7" cols="75" disabled>{{a.reason}}</textarea >
+            </div>            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
+
+                {%if show_cancel_ncr_btn %} 
+                    <button type="button" id="denyCancelNCR" class="btn btn-danger" name="" value="" onclick="javascript:validateDeny('denyCancelRequest');" >Deny</button>
+                    <!--<button type="button" class="btn btn-primary active save-btn" id="cancelNCR" value="modal" onclick="cancelNCR_modal_func(this.value)">Cancel NCR</button>-->   
+                    <button type="button" class="btn btn-primary active save-btn" id="acceptToCancelNCR" value="">Cancel NCR</button>    
+                {% endif %}   
+            </div>            
+        </div>
+    </div>
+</div>          
+{%endif%}
+
 <div id="confirm_3" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -774,13 +790,12 @@
 				</p></div>
 			</div>
 			<div class="modal-footer justify-content-center">
-				<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
+				<button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
 				<button type="button" class="btn btn-success" id="btnContinueSave" name="continueSave" value="continueSave">Continue</button>
 			</div>
 		</div>
 	</div>
 </div> 
-
 
 <div id="confirm_reset" class="modal fade">
 	<div class="modal-dialog">
@@ -794,7 +809,7 @@
 			<div class="modal-body">
 				<p> If you click [<b>CONTINUE</b>] button, your inputs will be not be saved in database and<br> 
 				   information displayed on screen will be reset to database's current information <br>
-				   for this NCR.
+				   for this NCR.<br> Otherwise, click [<b>CLOSE</b>] button to close this pop-up screen.
 				</p>
 			</div>
 			<div class="modal-footer justify-content-center">
@@ -804,8 +819,7 @@
 			</div>
 		</div>
 	</div>
-</div> 
-
+</div>
 
 <!--
 <div id="confirm_3" class="modal fade">
@@ -1044,7 +1058,6 @@
   </div>
 </div>    
 
-
 <!-- Start modifying for additional Request Edric 2024/04/04 -->
 <div id="cancelNCRmodal" class="modal fade">
 	<div class="modal-dialog">
@@ -1069,7 +1082,6 @@
 		</div>
 	</div>
 </div> 
-
 
 <div id="cancelNCRmodalDenied" class="modal fade">
 	<div class="modal-dialog">
@@ -1098,7 +1110,6 @@
 	</div>
 </div> 
 
-
 <div id="NCR_cancel_message_modal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -1106,29 +1117,75 @@
 				<div class="icon-box">
 					<i class="material-icons">&#xE5CD;</i>
 				</div>					
-				<h4 class="modal-title w-100">NCR Cancel Message</h4>	                
+				<!--<h4 class="modal-title w-100">NCR Cancel Message</h4>-->
+        <h4 class="modal-title w-100"><b>NCR Cancel Reason</b></h4>	                
 			</div>
 			<div class="modal-body">
-                <p>
-				   <label for="reason" class="col-form-label" id="reason">Message:</label>
-				   <textarea  class="form-control"  rows="7" cols="75"  disabled>{{a.reason}}</textarea>
+           <p>
+				   <!--<label for="reason" class="col-form-label" id="reason">Message:</label>-->
+           <textarea  class="form-control"  rows="7" cols="75"  disabled>{{a.reason}}</textarea>
 				</p>
 			</div>
 			<div class="modal-footer justify-content-center">
-				<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>
-				
+				<!--<button type="button" class="btn btn-warning" data-dismiss="modal">Cancel</button>-->
+        <button type="button" class="btn btn-warning" data-dismiss="modal">Close</button>
 			</div>
 		</div>
 	</div>
 </div> 
 <!-- End modifying for additional Request Edric 2024/04/04 -->
 
+<!-- START: Added reginaldo-jsp 2025.02.07 -->
+<div class="modal fade" role="dialog" id="confirm_cancel_ncr">
+  <div class="modal-dialog modal-md">
+      <div class="modal-content">
+          <div class="modal-header">
+              <center><h3 class="modal-title"><font color="blue">Cancel NCR</font></h3>
+                  <h5>Input reason then click on <b>Cancel NCR</b> button to cancel this NCR,<br> otherwise click <b>Close</b> button</h5>
+              </center>
+          </div>
+          <div class="modal-body">
+              <label for="reason" class="col-form-label">Reason of Cancellation:</label><br>
+              <textarea class="form-control" rows="7" cols="75" id="cancellationReason" name="cancellationReason"></textarea >
+          </div>            
+          <div class="modal-footer">
+              <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
+              <input type="button" class="btn btn-success" name="btnProceedToCancelNCR" value="Cancel NCR" id="btnProceedToCancelNCR" >
+          </div>            
+      </div>
+  </div>
+</div> 
 
-{% if data.status == '2' and a.phase == 'H'%}
-    <button type="button" class="btn btn-primary active save-btn" id="NCR_cancel_message" >
-      NCR Cancel Message
-    </button>
+<div class="modal fade" role="dialog" id="confirm_request_to_cancel_ncr">
+  <div class="modal-dialog modal-md">
+      <div class="modal-content">
+          <div class="modal-header">
+              <center><h3 class="modal-title"><font color="blue">Request To Cancel NCR</font></h3>
+                  <h5>Input reason then click on [<b>Request To Cancel NCR</b>] button<br> to send cancellation request for this NCR,<br> otherwise click [<b>Close</b>] button to close this confirmation window</h5>
+              </center>
+          </div>
+          <div class="modal-body">
+              <label for="reason" class="col-form-label">Reason of Cancellation:</label><br>
+              <textarea class="form-control" rows="7" cols="75" id="requestCancellationReason" name="requestCancellationReason"></textarea >
+          </div>            
+          <div class="modal-footer">
+              <button type="button" class="btn btn-warning" id="mCancelBtnCancel" data-dismiss="modal">Close</button>
+              <input type="button" class="btn btn-success" name="btnProceedRequestToCancelNCR" value="Request To Cancel NCR" id="btnProceedRequestToCancelNCR" >
+          </div>            
+      </div>
+  </div>
+</div> 
+<!-- END: Added reginaldo-jsp 2025.02.07 -->
+
+
+<!--START: Delete reginaldo-jsp 2025.02.07-->
+<!--{% if data.status == '2' and a.phase == 'H'%}
+<button type="button" class="btn btn-primary active save-btn" id="NCR_cancel_message" >
+  View NCR Cancel Reason
+</button>
 {%endif%}
+-->
+<!--END: Delete reginaldo-jsp 2025.02.07-->
 
 {% if data.close_date|date:"Y-m-d" == '' %}
 
@@ -1141,23 +1198,28 @@
     <button type="button" class="btn btn-primary active save-btn" name="btnSave" id="btnSave" value="S" onclick="saveNF(this.value)">
       <span class="glyphicon glyphicon-floppy-save"></span> Save Only
     </button>
-    
-    
     <button type="button" class="btn btn-primary active save-btn" name="btnSave" id="btnSave" value="SN" onclick="saveNF(this.value)">
       <span class="glyphicon glyphicon-floppy-save"></span> Save & 
       <span class="glyphicon glyphicon-bell"></span> Notify
     </button>
 
-     <!-- End modifying for additional request Edric Marinas 2024/03/06-->
-    
-    
+    <!-- End modifying for additional request Edric Marinas 2024/03/06-->
       
-      
+    <!--START: Modify reginaldo-jsp 2025.02.07-->
+    {% if ncr_no != '' %}
       <button type="button" class="btn btn-primary active save-btn" id="btnReset">
-        <span class="glyphicon glyphicon-refresh"></span> Reset
+        <span class="glyphicon glyphicon-refresh"></span> Display Latest Info
       </button>
-      <!-- Start modifying for additional request Edric Marinas 2024/04/04 -->
-      
+    {%endif%}
+    <!--END: Modify reginaldo-jsp 2025.02.307 -->
+    
+    {% if data.status == '7' and a.phase == 'G'%}
+        <button type="button" class="btn btn-primary active save-btn" id="seeCancelReason">
+          View Cancel Request Reason
+        </button>
+    {%endif%}
+
+    <!--
     {% if a.phase == 'H' and data.status != '7' %}
         <button type="button" class="btn btn-primary active save-btn" id="SHdenyReason" >
           Cancel Request Denied
@@ -1171,9 +1233,21 @@
           Cancel Request <font size="1px">(wait for response)</font>
         </button> 
     {%endif%}
-    
-      <!-- End modifying for additional request Edric Marinas 2024/04/04 -->
-      
+    -->
+    <!-- End modifying for additional request Edric Marinas 2024/04/04 -->
+     
+    {%if show_cancel_ncr_btn and data.status != '7'%} 
+      <button type="button" class="btn btn-primary active save-btn" id="btnConfirmCancelNCR" >
+        Cancel NCR
+      </button> 
+    {% endif %} 
+
+    {%if show_req_cancel_ncr_btn and data.status != '7'%} 
+      <button type="button" class="btn btn-primary active save-btn" id="btnConfirmRequestToCancelNCR" >
+        Request To Cancel NCR 
+      </button> 
+    {% endif %} 
+
       {% if deny_reasonA != '' %}
         <a data-target="#modalForA" data-toggle="modal" class="MainNavText" id="MainNavHelp" href="#modalForA">
           <button type="button" class="btn btn-primary active save-btn">
@@ -1218,10 +1292,8 @@
           </button>
           </a>       
       {% endif %}
-
-          
-
     </div>
+
     <div class="col-sm-3">
       {% if data.deadline != None %}
         <h4><p class="text-right">Deadline: {{data.deadline|date:'d F o'}}
@@ -1234,15 +1306,26 @@
       {% endif %}
     </div>      
   </div>
+
 {% else %}  
 
   <div class="row">
-    <div class="col-sm-9">
-      &nbsp;
+    <!--START: Modify reginaldo-jsp 2025.02.07--> 
+    <div class="col-sm-8">
+      <!--START: Modify reginaldo-jsp 2025.02.07-->
+      {% if data.status == '2' and a.phase == 'H'%}
+          <button type="button" class="btn btn-primary active save-btn" id="NCR_cancel_message" >
+            View NCR Cancel Reason
+          </button>
+      {%else%}
+          &nbsp;
+      {%endif%}
+      <!--END: Modify reginaldo-jsp 2025.02.07 -->
     </div>
-    <div class="col-sm-3">
+    <!--START: Modify reginaldo-jsp 2025.02.07--> 
+    <div class="col-sm-4">
+    <!--END: Modify reginaldo-jsp 2025.02.07--> 
       {% if data.status == '2' %}
-
         <h4><p class="text-right">Date Cancelled: {{data.close_date|date:'d F o'}}</p></h4>               
       {% elif data.status == '5' %}
         <h4><p class="text-right">Date Closed: {{data.close_date|date:'d F o'}}</p></h4>              
@@ -1260,7 +1343,7 @@
     {% if ncr_no_size == 'S' %}
       <strong><h2><small>Rec No:</small>{{data.ncr_no}}</h1></strong>
     {%else%}
-      <strong><h4><small>Rec No:</small>{{data.ncr_no}}</h4></strong>
+      <strong><h3><small>Rec No:</small>{{data.ncr_no}}</h3></strong>
     {%endif%}  
       <center><h5>YYYY-MM-DD-Section-Project-Serial</h5></center>  
     </div>
@@ -2274,7 +2357,6 @@
             $("#other_source").attr("disabled", true);
             $("#other_source").val("");
          }      
-         
      });
      
      $('input[name="ca_necessary"]:radio').change(function () {
@@ -2323,16 +2405,12 @@
              $('#forReadOnlyF').show();
              $('#forUpdateF').hide();                         
          }
-
     });
 
     $(document).ready(function(){
         init_screen();
-    
-    
-
-
-     //<!--Start Adding for additional request Edric Marinas 2024/02/26 -->  
+  
+        //<!--Start Adding for additional request Edric Marinas 2024/02/26 -->  
         if($('#se_ro_updated_0').is(':checked')){
             $("#se_ro_updated_1")[0].checked = false;
         }
@@ -2345,13 +2423,10 @@
         if( success_msgSpan.innerHTML == "No change was made"){
             success_msgSpan.style.color = "red";
         }
-
     });    
     
     function checkboxFunction(){
-        
         $("#se_ro_updated_1").hide();
-        
         
         $("#se_ro_updated_0").click(function(){
             if($(this).is(':checked')){
@@ -2362,8 +2437,6 @@
             }
         });
     }
-    
-    
     //<!--End Adding for additional request Edric Marinas 2024/02/26 --> 
     
     $(function () {
@@ -2430,13 +2503,8 @@
                             
                 $("#ca_check_date_by_sh").val("");
                 $("#ca_approved_date_by_mgr").val("");                   
-          
             }  
         });
-        
-
-        
-        
         
         $("#modalForD").on("hide.bs.modal show.bs.modal", function(event) {
             var activeElementId = $(document.activeElement).attr("id"); 
@@ -2691,7 +2759,7 @@
                             //}                                                                                     
                         } else {    
                             $("#success_msg").html("");                   
-                            $("#err_msg").html("<h3><font color='red'>At " + data.latest_update_date + ", this NCR was already updated by " + data.latest_update_by + "<br>Click Reset button to acquire latest status.</font></h3>");
+                            $("#err_msg").html("<h3><font color='red'>At " + data.latest_update_date + ", this NCR was already updated by " + data.latest_update_by + "<br>Click <b>Display Latest Info</b> button to acquire NCR's latest information from database.</font></h3>");
                         }
                     }
                 });   
@@ -2703,11 +2771,9 @@
                     if ($("input[name='classification']:checked").val() == '2' && $('#se_description').val() == '') {                
                         $("#confirm_1").modal("show");   
              
-                    } else if ($("input[name='classification']:checked").val() == '2' && $("input[name='se_ro_updated']:checked").val() != '1') { 
-                        
+                    } else if ($("input[name='classification']:checked").val() == '2' && $("input[name='se_ro_updated']:checked").val() != '1') {                         
                         //<!--Start modifying 2024/04/19 Edric 
                         //$("#confirm_2").modal("show");-->
-                    
                         var S_or_SN = document.getElementById('S_or_SN');
                         if(S_or_SN.value == "S"){
                             $("#confirm_2_saveOnly").modal("show");
@@ -2725,8 +2791,6 @@
                             }
                         }                
                         //<!--End modifying 2024/04/19 Edric -->
-                        
-                        
                     } else {
                         $("#ncrCreateForm").submit(); 
                     }
@@ -2735,8 +2799,6 @@
                 }
             }                 
         }); 
-
-
 
         $("#btnReset").click(function () {
             $("#confirm_reset").modal("show");   
@@ -2754,21 +2816,59 @@
         
         
         //<!-- End modification for additional request Edric 20204/04/01 -->
-        
-        
-        
-        
         $("#btnContinueReset").click(function () {    
             $("#ncrCreateForm").attr("action", "{% url 'NCRMgmntSystem:ncr_create_view' %}");  
             $("#reason_action_not_effective").val("")
             $("#ncrCreateForm").submit(); 
         });
         
-        
-        
-        
-        
-        
+        //START: reginaldo-jsp 2025.02.07 
+        $("#btnConfirmCancelNCR").click(function () {
+            $("#confirm_cancel_ncr").modal("show");   
+        });
+
+        $("#btnProceedToCancelNCR").click(function () {
+          var cancellationReason = document.getElementById('cancellationReason').value;
+          $("#hidden_cancel_reason").val(cancellationReason);
+          $("#process").val("cancelNCR");
+          $("#ncrCreateForm").submit();
+        });
+
+        $("#seeCancelReason").click(function () {
+          $("#cancelRequest_modal").modal("show");   
+        });
+
+        $("#cancelNCR").click(function () {
+          var cancellationReason = document.getElementById('cancellationReason').value;
+          $("#hidden_cancel_reason").val(cancellationReason);
+          $("#process").val("cancelNCR");
+          $("#ncrCreateForm").submit();
+        });
+
+        $("#btnConfirmRequestToCancelNCR").click(function () {
+            $("#confirm_request_to_cancel_ncr").modal("show");   
+        });
+
+        $("#btnProceedRequestToCancelNCR").click(function () {
+            var requestCancellationReason = document.getElementById('requestCancellationReason').value; 
+            $("#hidden_cancel_reason").val(requestCancellationReason);
+            $("#hidden_request_cancel").val("7"); 
+            //$("#hidden_process").val("requestToCancelNCR");
+            $("#ncrCreateForm").submit();
+        });
+
+        $("#denyCancelNCR").click(function () {
+          var cancellationReason = document.getElementById('cancellationReason').value;
+          $("#hidden_cancel_reason").val(cancellationReason);
+          $("#process").val("denyCancelRequest");
+          $("#ncrCreateForm").submit();
+        });
+
+        $("#acceptToCancelNCR").click(function () {
+          $("#process").val("acceptToCancelNCR");
+          $("#ncrCreateForm").submit();
+        });
+        //END: reginaldo-jsp 2025.02.07
         
         $('input[name="ra_action_effective"]:radio').change(function () {
             $("#ra_followup_date_picker").prop('disabled', true);
@@ -2855,17 +2955,7 @@
            }          
        });
        
-       
-       
-       
-       
-       
-       
     });
-    
-    
-
-
 
 //Start Adding Edric Marinas 2024/05/15
 
@@ -3213,9 +3303,9 @@ function saveNF(a){
                 + ra_followup_date + "</b>."    
         } else { 
             if (a == "S") {
-                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>only save</b> your inputs in database but will <b>not send</b> notification."
+                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>only save</b> your inputs in database but will <b>not send</b> notification.<br>Clicking [<b>Close</b>] button will only close this confirmation window."
             } else if (a == "SN") {
-                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>save</b> your inputs in database and <b>send</b> <br> notification to checker/s."
+                document.getElementById('modal-body1').innerHTML = "If you click [<b>CONTINUE</b>] button, the system will <b>save</b> your inputs in database and <b>send</b> <br> notification to checker/s.<br>Clicking [<b>Close</b>] button will only close this confirmation window"
             }
         } 
 
@@ -3241,13 +3331,10 @@ function request_cancel(){
     button.form.submit();
 }
 
-</script>
+//START: Add reginaldo-jsp 2025.02.11
+//$("#cancelRequest_modal").modal("show");
+//END: Add reginaldo-jsp 2025.02.11
+
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
